@@ -36,11 +36,12 @@ export type Ricetta = {
   standard: boolean;
 };
 
-export async function fetchRicetteUtente(deviceId: string): Promise<Ricetta[]> {
+export async function fetchRicetteUtente(libri: string[]): Promise<Ricetta[]> {
+  if (libri.length === 0) return [];
   const { data, error } = await supabase
     .from("ricette_utente")
     .select("id, nome, ingredienti, procedimento, pasto, tag")
-    .eq("device_id", deviceId)
+    .in("libro", libri)
     .order("created_at", { ascending: false });
   if (error) throw error;
   return (data ?? []).map((r) => ({
@@ -89,6 +90,7 @@ export async function salvaImpostazioni(deviceId: string, usaStandard: boolean) 
 
 export async function creaRicetta(input: {
   deviceId: string;
+  libro: string;
   nome: string;
   ingredienti?: string;
   procedimento?: string;
@@ -97,6 +99,7 @@ export async function creaRicetta(input: {
 }) {
   const { error } = await supabase.from("ricette_utente").insert({
     device_id: input.deviceId,
+    libro: input.libro,
     nome: input.nome,
     ingredienti: input.ingredienti || null,
     procedimento: input.procedimento || null,
@@ -106,12 +109,12 @@ export async function creaRicetta(input: {
   if (error) throw error;
 }
 
-export async function eliminaRicetta(id: string, deviceId: string) {
+export async function eliminaRicetta(id: string, libri: string[]) {
   const { error } = await supabase
     .from("ricette_utente")
     .delete()
     .eq("id", id)
-    .eq("device_id", deviceId);
+    .in("libro", libri);
   if (error) throw error;
 }
 

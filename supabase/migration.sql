@@ -91,3 +91,16 @@ create policy "impostazioni_dispositivo_all" on public.impostazioni_dispositivo
 grant select, insert, update, delete on public.ricette_standard to anon, authenticated;
 grant select, insert, update, delete on public.ricette_utente to anon, authenticated;
 grant select, insert, update, delete on public.impostazioni_dispositivo to anon, authenticated;
+
+-- 6) "Libro di ricette": un codice che raggruppa le ricette utente e puo'
+--    essere seguito da piu' dispositivi (per sincronizzare le ricette tra
+--    dispositivi diversi senza login). Il device_id resta e continua a
+--    registrare quale dispositivo ha creato la riga; il libro determina
+--    chi la vede. Per le righe gia' esistenti il libro di default e' il
+--    device_id stesso, cosi' non sparisce nulla dopo la migrazione.
+alter table public.ricette_utente add column if not exists libro text;
+update public.ricette_utente set libro = device_id where libro is null;
+alter table public.ricette_utente alter column libro set not null;
+
+create index if not exists ricette_utente_libro_idx
+  on public.ricette_utente (libro);

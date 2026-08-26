@@ -4,7 +4,14 @@ import { Filters } from "./components/Filters";
 import { AggiungiRicetta } from "./components/AggiungiRicetta";
 import { ElencoRicette } from "./components/ElencoRicette";
 import { Impostazioni } from "./components/Impostazioni";
-import { getDeviceId } from "./lib/device";
+import {
+  aggiungiLibro,
+  getDeviceId,
+  getLibri,
+  getLibroAttivo,
+  rimuoviLibro,
+  setLibroAttivo,
+} from "./lib/device";
 import {
   creaRicetta,
   eliminaRicetta,
@@ -34,6 +41,9 @@ function nuovoSlot(): PiattoSlot {
 export default function App() {
   const deviceId = useMemo(() => getDeviceId(), []);
 
+  const [libri, setLibri] = useState<string[]>(() => getLibri());
+  const [libroAttivo, setLibroAttivoState] = useState<string>(() => getLibroAttivo());
+
   const [ricette, setRicette] = useState<Ricetta[]>([]);
   const [usaStandard, setUsaStandard] = useState(true);
   const [caricando, setCaricando] = useState(true);
@@ -46,12 +56,12 @@ export default function App() {
   const [mostraElenco, setMostraElenco] = useState(false);
   const [mostraOpzioni, setMostraOpzioni] = useState(false);
 
-  async function ricarica() {
+  async function ricarica(libriDaUsare: string[] = libri) {
     setCaricando(true);
     setErroreCaricamento(null);
     try {
       const [mie, standard, opzioni] = await Promise.all([
-        fetchRicetteUtente(deviceId),
+        fetchRicetteUtente(libriDaUsare),
         fetchRicetteStandard(),
         fetchImpostazioni(deviceId),
       ]);
@@ -146,13 +156,31 @@ export default function App() {
     pasto: Categoria[];
     tag: string[];
   }) {
-    await creaRicetta({ deviceId, ...input });
+    await creaRicetta({ deviceId, libro: libroAttivo, ...input });
     await ricarica();
   }
 
   async function handleElimina(id: string) {
-    await eliminaRicetta(id, deviceId);
+    await eliminaRicetta(id, libri);
     await ricarica();
+  }
+
+  function handleAggiungiLibro(codice: string) {
+    const nuovi = aggiungiLibro(codice);
+    setLibri(nuovi);
+    ricarica(nuovi);
+  }
+
+  function handleRimuoviLibro(codice: string) {
+    const nuovi = rimuoviLibro(codice);
+    setLibri(nuovi);
+    setLibroAttivoState(getLibroAttivo());
+    ricarica(nuovi);
+  }
+
+  function handleImpostaAttivo(codice: string) {
+    setLibroAttivo(codice);
+    setLibroAttivoState(codice);
   }
 
   return (
@@ -291,6 +319,12 @@ export default function App() {
           usaStandard={usaStandard}
           onCambia={handleCambiaOpzioni}
           onChiudi={() => setMostraOpzioni(false)}
+          codiceDispositivo={deviceId}
+          libri={libri}
+          libroAttivo={libroAttivo}
+          onAggiungiLibro={handleAggiungiLibro}
+          onRimuoviLibro={handleRimuoviLibro}
+          onImpostaAttivo={handleImpostaAttivo}
         />
       )}
     </div>

@@ -25,7 +25,14 @@ dati su Supabase (Postgres).
 - Opzione "Usa anche le ricette standard": se disattivata, la ruota usa
   solo le ricette create dall'utente su quel dispositivo.
 - Nessun account: ogni dispositivo/browser ha un id casuale salvato in
-  `localStorage`, usato per associare le proprie ricette e impostazioni.
+  `localStorage`, usato per le impostazioni e come "libro di ricette"
+  personale di default.
+- **Libri di ricette**: le ricette proprie vivono in un "libro"
+  identificato da un codice. Un dispositivo puo' seguire piu' libri
+  (il proprio + eventuali altri aggiunti incollando un codice preso da
+  un altro dispositivo/persona): le ricette si vedono da tutti i libri
+  seguiti, quelle nuove si salvano sul libro scelto come attivo. Si
+  gestisce dal pannello Opzioni.
 
 ## Struttura del progetto
 
@@ -33,7 +40,7 @@ dati su Supabase (Postgres).
 src/
   App.tsx                    orchestrazione stato, fetch, filtri, spin
   lib/
-    device.ts                id per-dispositivo
+    device.ts                id dispositivo + libri di ricette seguiti (localStorage)
     supabase.ts              client Supabase (da variabili d'ambiente)
     database.types.ts        tipi TypeScript dello schema Postgres
     recipes.ts                tipi ricetta, CRUD, mappa icone
@@ -50,19 +57,23 @@ supabase/
 ## 1. Database (Supabase)
 
 Il progetto e' collegato al Supabase dedicato `fortunerecipe`
-(`jceaixxavftisrjbzyqk`). E' un progetto nuovo/vuoto: prima di avviare
-l'app, apri l'SQL editor del progetto Supabase e incolla il contenuto di
-`supabase/migration.sql`. Lo script crea le tabelle `ricette_standard`,
-`ricette_utente` e `impostazioni_dispositivo` con RLS aperta e filtrata
-per `device_id` lato applicazione. E' idempotente: puoi eseguirlo anche
-piu' volte senza rischi.
+(`jceaixxavftisrjbzyqk`). Prima di avviare l'app, apri l'SQL editor del
+progetto Supabase e incolla il contenuto di `supabase/migration.sql`.
+Lo script crea le tabelle `ricette_standard`, `ricette_utente` (con la
+colonna `libro`, che raggruppa le ricette in "libri" seguibili da piu'
+dispositivi) e `impostazioni_dispositivo`, con RLS aperta e filtrata
+lato applicazione. E' idempotente: puoi eseguirlo anche piu' volte
+senza rischi, anche per aggiornare un progetto gia' esistente a una
+versione precedente dello schema.
 
 > Nota sulla sicurezza: le policy RLS attuali (`USING (true)`) permettono
 > a chiunque conosca la chiave pubblica di leggere/scrivere righe di
-> qualunque `device_id`, non solo il proprio: l'isolamento e' solo
-> convenzionale lato client, non garantito dal database. Per un'app di
-> ricette personali e' un compromesso accettabile, ma e' bene saperlo -
-> non e' "privacy vera", e' "privacy per obscurity".
+> qualunque `libro` o `device_id`, non solo il proprio: l'isolamento e'
+> solo convenzionale lato client, non garantito dal database. Il codice
+> di un libro va quindi trattato come una password leggera da non
+> condividere pubblicamente. Per un'app di ricette personali e' un
+> compromesso accettabile, ma e' bene saperlo - non e' "privacy vera",
+> e' "privacy per obscurity".
 
 ## 2. Sviluppo locale
 

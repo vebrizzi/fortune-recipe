@@ -61,6 +61,7 @@ export type Database = {
         Row: {
           created_at: string;
           device_id: string;
+          libro: string;
           id: string;
           ingredienti: string | null;
           procedimento: string | null;
@@ -71,6 +72,7 @@ export type Database = {
         Insert: {
           created_at?: string;
           device_id: string;
+          libro: string;
           id?: string;
           ingredienti?: string | null;
           procedimento?: string | null;
@@ -81,6 +83,7 @@ export type Database = {
         Update: {
           created_at?: string;
           device_id?: string;
+          libro?: string;
           id?: string;
           ingredienti?: string | null;
           procedimento?: string | null;
