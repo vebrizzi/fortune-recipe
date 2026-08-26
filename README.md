@@ -7,13 +7,16 @@ dati su Supabase (Postgres).
 
 ## Cosa fa
 
-- Bottone "Cosa mangio oggi?" che fa girare una ruota con **icone** (non
-  nomi) associate alle ricette, ed estrae una ricetta a caso.
-- Filtri opzionali sopra la ruota: pasto (singola selezione) e tag
+- Campo "Quanti piatti vuoi generare?" (1-6): crea altrettante ruote
+  indipendenti, una per piatto, ciascuna con i propri filtri.
+- Ogni ruota ha **icone** (non nomi) associate alle ricette ed estrae una
+  ricetta a caso al bottone "Cosa mangio oggi?".
+- Filtri opzionali per ogni ruota: categoria (singola selezione tra
+  Tutti, Colazione, Main, Primo, Secondo, Contorno, Spuntino) e tag
   (multiselezione da menu a tendina).
 - Bottone **+** per salvare una ricetta propria: nome (obbligatorio),
-  ingredienti e procedimento (opzionali), pasto e tag in multiselezione,
-  con possibilita' di aggiungere tag personalizzati.
+  ingredienti e procedimento (opzionali), categoria e tag in
+  multiselezione, con possibilita' di aggiungere tag personalizzati.
 - Schermata "Le mie ricette" con filtro **solo mie / tutte** ed
   eliminazione delle ricette proprie.
 - Opzione "Usa anche le ricette standard": se disattivata, la ruota usa

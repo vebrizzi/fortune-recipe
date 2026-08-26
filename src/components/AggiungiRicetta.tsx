@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { PASTI, PASTO_LABEL, TAG_BASE, type Pasto } from "../lib/recipes";
+import { CATEGORIE, CATEGORIA_LABEL, TAG_BASE, type Categoria } from "../lib/recipes";
 
 export function AggiungiRicetta({
   onClose,
@@ -10,21 +10,21 @@ export function AggiungiRicetta({
     nome: string;
     ingredienti?: string;
     procedimento?: string;
-    pasto: Pasto[];
+    pasto: Categoria[];
     tag: string[];
   }) => Promise<void>;
 }) {
   const [nome, setNome] = useState("");
   const [ingredienti, setIngredienti] = useState("");
   const [procedimento, setProcedimento] = useState("");
-  const [pastiScelti, setPastiScelti] = useState<Pasto[]>([]);
+  const [pastiScelti, setPastiScelti] = useState<Categoria[]>([]);
   const [tagBase, setTagBase] = useState<string[]>([]);
   const [tagCustom, setTagCustom] = useState<string[]>([]);
   const [nuovoTag, setNuovoTag] = useState("");
   const [salvataggio, setSalvataggio] = useState(false);
   const [errore, setErrore] = useState<string | null>(null);
 
-  function togglePasto(p: Pasto) {
+  function togglePasto(p: Categoria) {
     setPastiScelti((prev) =>
       prev.includes(p) ? prev.filter((x) => x !== p) : [...prev, p]
     );
@@ -115,16 +115,16 @@ export function AggiungiRicetta({
           </label>
 
           <div className="flex flex-col gap-1">
-            <span className="text-sm opacity-80">Pasto (multiselezione)</span>
+            <span className="text-sm opacity-80">Categoria (multiselezione)</span>
             <div className="flex flex-wrap gap-1.5">
-              {PASTI.map((p) => (
+              {CATEGORIE.map((p) => (
                 <span
                   key={p}
                   className="pixel-chip"
                   data-active={pastiScelti.includes(p)}
                   onClick={() => togglePasto(p)}
                 >
-                  {PASTO_LABEL[p]}
+                  {CATEGORIA_LABEL[p]}
                 </span>
               ))}
             </div>

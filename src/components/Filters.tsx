@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { PASTI, PASTO_LABEL, type Pasto } from "../lib/recipes";
+import { CATEGORIE, CATEGORIA_LABEL, type Categoria } from "../lib/recipes";
 
 export function Filters({
   pasto,
@@ -8,8 +8,8 @@ export function Filters({
   tagSelezionati,
   setTagSelezionati,
 }: {
-  pasto: Pasto | null;
-  setPasto: (p: Pasto | null) => void;
+  pasto: Categoria | null;
+  setPasto: (p: Categoria | null) => void;
   tagDisponibili: string[];
   tagSelezionati: string[];
   setTagSelezionati: (t: string[]) => void;
@@ -45,14 +45,14 @@ export function Filters({
         >
           Tutti
         </span>
-        {PASTI.map((p) => (
+        {CATEGORIE.map((p) => (
           <span
             key={p}
             className="pixel-chip"
             data-active={pasto === p}
             onClick={() => setPasto(pasto === p ? null : p)}
           >
-            {PASTO_LABEL[p]}
+            {CATEGORIA_LABEL[p]}
           </span>
         ))}
       </div>

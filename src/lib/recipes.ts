@@ -1,12 +1,27 @@
 import { supabase } from "./supabase";
 
-export type Pasto = "colazione" | "pranzo" | "spuntino" | "cena";
-export const PASTI: Pasto[] = ["colazione", "pranzo", "spuntino", "cena"];
-export const PASTO_LABEL: Record<Pasto, string> = {
+export type Categoria =
+  | "colazione"
+  | "main"
+  | "primo"
+  | "secondo"
+  | "contorno"
+  | "spuntino";
+export const CATEGORIE: Categoria[] = [
+  "colazione",
+  "main",
+  "primo",
+  "secondo",
+  "contorno",
+  "spuntino",
+];
+export const CATEGORIA_LABEL: Record<Categoria, string> = {
   colazione: "Colazione",
-  pranzo: "Pranzo",
+  main: "Main",
+  primo: "Primo",
+  secondo: "Secondo",
+  contorno: "Contorno",
   spuntino: "Spuntino",
-  cena: "Cena",
 };
 
 export const TAG_BASE = ["light", "vegetariano", "vegano", "low cost"];
@@ -125,11 +140,13 @@ const KEYWORD_ICONS: Array<{ keywords: string[]; icon: string }> = [
   { keywords: ["patate"], icon: "🥔" },
 ];
 
-const PASTO_FALLBACK_ICON: Record<Pasto, string> = {
+const CATEGORIA_FALLBACK_ICON: Record<Categoria, string> = {
   colazione: "☕",
-  pranzo: "🍽️",
+  main: "🍽️",
+  primo: "🍝",
+  secondo: "🍗",
+  contorno: "🥗",
   spuntino: "🍪",
-  cena: "🍴",
 };
 
 export function iconaRicetta(ricetta: Ricetta): string {
@@ -137,9 +154,9 @@ export function iconaRicetta(ricetta: Ricetta): string {
   for (const entry of KEYWORD_ICONS) {
     if (entry.keywords.some((k) => testo.includes(k))) return entry.icon;
   }
-  const primoPasto = ricetta.pasto[0] as Pasto | undefined;
-  if (primoPasto && PASTO_FALLBACK_ICON[primoPasto]) {
-    return PASTO_FALLBACK_ICON[primoPasto];
+  const primaCategoria = ricetta.pasto[0] as Categoria | undefined;
+  if (primaCategoria && CATEGORIA_FALLBACK_ICON[primaCategoria]) {
+    return CATEGORIA_FALLBACK_ICON[primaCategoria];
   }
   return "🍴";
 }
