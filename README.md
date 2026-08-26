@@ -7,9 +7,10 @@ dati su Supabase (Postgres).
 
 ## Cosa fa
 
-- Campo "Quanti piatti vuoi generare?" (1-4): crea altrettante ruote
-  indipendenti, una per piatto, ciascuna con i propri filtri, disposte
-  in orizzontale su schermi larghi e impilate su mobile.
+- Slider "Quanti piatti vuoi generare?" (1-4): aggiorna in tempo reale
+  il numero di ruote indipendenti mostrate (una per piatto, ciascuna
+  con i propri filtri), centrate e disposte in orizzontale su schermi
+  larghi, impilate su mobile.
 - Un solo bottone "Cosa mangio oggi?" fa girare **tutte** le ruote
   contemporaneamente, estraendo una ricetta a caso per ciascun piatto
   (mostrata con un'**icona**, non il nome).
@@ -123,6 +124,7 @@ Colori "da cucina" definiti in `src/index.css` come token Tailwind:
 marrone (`--color-wood`), ocra (`--color-ochre`), rosso pomodoro
 (`--color-tomato`), verde ottanio (`--color-ottanio`, un teal scuro -
 se intendevi un'altra tonalita' con "ottanio" e' il primo punto da
-sistemare). Stile semplice e pulito: font "Patrick Hand" (handwritten)
-per titoli/bottoni/etichette, "Nunito" per i testi, pannelli con angoli
-arrotondati e ombre morbide, ruota con icone piu' grandi e stilizzate.
+sistemare). Stile semplice e pulito: font "Baloo 2" (bold) per i
+titoli, "Patrick Hand" (handwritten) per bottoni/etichette, "Nunito"
+per i testi, pannelli con angoli arrotondati e ombre morbide, ruota con
+icone piu' grandi e stilizzate.

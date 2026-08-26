@@ -94,9 +94,18 @@ export default function App() {
   const staGirando = piattiConRicette.some((s) => s.spinning);
   const nessunaRicettaDisponibile = piattiConRicette.every((s) => s.filtrate.length === 0);
 
-  function generaRuote() {
-    setPiatti(Array.from({ length: numeroPiatti }, nuovoSlot));
-  }
+  useEffect(() => {
+    setPiatti((prev) => {
+      if (numeroPiatti === prev.length) return prev;
+      if (numeroPiatti > prev.length) {
+        return [
+          ...prev,
+          ...Array.from({ length: numeroPiatti - prev.length }, nuovoSlot),
+        ];
+      }
+      return prev.slice(0, numeroPiatti);
+    });
+  }, [numeroPiatti]);
 
   function aggiornaSlot(i: number, patch: Partial<PiattoSlot>) {
     setPiatti((prev) => prev.map((s, idx) => (idx === i ? { ...s, ...patch } : s)));
@@ -168,28 +177,18 @@ export default function App() {
         )}
 
         <div className="pixel-panel flex w-full max-w-md flex-col gap-2 p-4">
-          <span className="text-sm opacity-80">Quanti piatti vuoi generare?</span>
-          <div className="flex items-center gap-2">
-            <input
-              type="number"
-              min={1}
-              max={MAX_PIATTI}
-              className="pixel-input w-20 text-center"
-              value={numeroPiatti}
-              onChange={(e) =>
-                setNumeroPiatti(
-                  Math.min(MAX_PIATTI, Math.max(1, Number(e.target.value) || 1))
-                )
-              }
-            />
-            <button
-              type="button"
-              className="pixel-btn pixel-btn-ottanio flex-1 px-3 py-2 text-sm"
-              onClick={generaRuote}
-            >
-              Genera ruote
-            </button>
+          <div className="flex items-center justify-between">
+            <span className="text-sm opacity-80">Quanti piatti vuoi generare?</span>
+            <span className="pixel-font text-xl">{numeroPiatti}</span>
           </div>
+          <input
+            type="range"
+            min={1}
+            max={MAX_PIATTI}
+            value={numeroPiatti}
+            onChange={(e) => setNumeroPiatti(Number(e.target.value))}
+            className="w-full accent-[var(--color-tomato)]"
+          />
         </div>
 
         {caricando && <p className="text-sm opacity-70">Carico le ricette...</p>}
@@ -205,11 +204,11 @@ export default function App() {
         )}
 
         {!caricando && (
-          <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="flex w-full flex-wrap justify-center gap-4">
             {piattiConRicette.map((slot, i) => (
               <div
                 key={i}
-                className="pixel-panel flex w-full flex-col items-center gap-3 p-3"
+                className="pixel-panel flex w-full max-w-[19rem] flex-col items-center gap-3 p-3 sm:w-72"
               >
                 <h2 className="pixel-font text-lg">Piatto {i + 1}</h2>
 
