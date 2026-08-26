@@ -1,44 +1,110 @@
 import { useState } from "react";
+import type { LibroLocale } from "../lib/device";
+
+type RisultatoUnione = { ok: true } | { ok: false; messaggio: string };
 
 export function Impostazioni({
   usaStandard,
   onCambia,
   onChiudi,
-  codiceDispositivo,
   libri,
   libroAttivo,
-  onAggiungiLibro,
-  onRimuoviLibro,
   onImpostaAttivo,
+  onRimuovi,
+  onRinomina,
+  onCrea,
+  onUnisciti,
 }: {
   usaStandard: boolean;
   onCambia: (v: boolean) => void;
   onChiudi: () => void;
-  codiceDispositivo: string;
-  libri: string[];
-  libroAttivo: string;
-  onAggiungiLibro: (codice: string) => void;
-  onRimuoviLibro: (codice: string) => void;
+  libri: LibroLocale[];
+  libroAttivo: string | null;
   onImpostaAttivo: (codice: string) => void;
+  onRimuovi: (codice: string) => void;
+  onRinomina: (codice: string, nome: string) => Promise<void>;
+  onCrea: (nome: string, password?: string) => Promise<void>;
+  onUnisciti: (codice: string, password?: string) => Promise<RisultatoUnione>;
 }) {
-  const [nuovoCodice, setNuovoCodice] = useState("");
-  const [copiato, setCopiato] = useState(false);
+  const [formAperto, setFormAperto] = useState<"nessuno" | "crea" | "unisciti">("nessuno");
+  const [inRinomina, setInRinomina] = useState<string | null>(null);
+  const [nomeRinomina, setNomeRinomina] = useState("");
+  const [errore, setErrore] = useState<string | null>(null);
+  const [caricando, setCaricando] = useState(false);
 
-  async function copiaCodice() {
+  const [nomeNuovo, setNomeNuovo] = useState("");
+  const [passwordNuovo, setPasswordNuovo] = useState("");
+  const [codiceUnione, setCodiceUnione] = useState("");
+  const [passwordUnione, setPasswordUnione] = useState("");
+
+  async function copiaCodice(codice: string) {
     try {
-      await navigator.clipboard.writeText(codiceDispositivo);
-      setCopiato(true);
-      setTimeout(() => setCopiato(false), 1500);
+      await navigator.clipboard.writeText(codice);
     } catch {
       // se il clipboard non e' disponibile non facciamo nulla
     }
   }
 
-  function handleAggiungi() {
-    const codice = nuovoCodice.trim();
-    if (!codice) return;
-    onAggiungiLibro(codice);
-    setNuovoCodice("");
+  function iniziaRinomina(libro: LibroLocale) {
+    setInRinomina(libro.codice);
+    setNomeRinomina(libro.nome);
+    setErrore(null);
+  }
+
+  async function confermaRinomina(codice: string) {
+    if (!nomeRinomina.trim()) return;
+    setCaricando(true);
+    setErrore(null);
+    try {
+      await onRinomina(codice, nomeRinomina.trim());
+      setInRinomina(null);
+    } catch {
+      setErrore("Non sono riuscito a rinominare il libro. Riprova.");
+    } finally {
+      setCaricando(false);
+    }
+  }
+
+  async function handleCrea() {
+    if (!nomeNuovo.trim()) {
+      setErrore("Dai un nome al nuovo libro.");
+      return;
+    }
+    setErrore(null);
+    setCaricando(true);
+    try {
+      await onCrea(nomeNuovo.trim(), passwordNuovo);
+      setNomeNuovo("");
+      setPasswordNuovo("");
+      setFormAperto("nessuno");
+    } catch {
+      setErrore("Non sono riuscito a creare il libro. Riprova.");
+    } finally {
+      setCaricando(false);
+    }
+  }
+
+  async function handleUnisciti() {
+    if (!codiceUnione.trim()) {
+      setErrore("Inserisci il codice del libro.");
+      return;
+    }
+    setErrore(null);
+    setCaricando(true);
+    try {
+      const risultato = await onUnisciti(codiceUnione.trim().toUpperCase(), passwordUnione);
+      if (risultato.ok) {
+        setCodiceUnione("");
+        setPasswordUnione("");
+        setFormAperto("nessuno");
+      } else {
+        setErrore(risultato.messaggio);
+      }
+    } catch {
+      setErrore("Non sono riuscito a controllare il codice. Riprova.");
+    } finally {
+      setCaricando(false);
+    }
   }
 
   return (
@@ -73,86 +139,186 @@ export function Impostazioni({
 
         <h3 className="pixel-font text-base">Libri di ricette</h3>
         <p className="mt-1 text-sm opacity-70">
-          Le tue ricette personali vivono in un "libro" identificato da un
-          codice. Copia il tuo codice e incollalo su un altro dispositivo per
-          vedere e aggiungere le stesse ricette da entrambi.
+          Le tue ricette vivono in uno o piu' "libri". Segui il codice di un
+          libro per vedere le sue ricette; aggiungi anche la password (se ne
+          ha una) per poterci scrivere in collaborazione.
         </p>
 
-        <div className="mt-3 flex flex-col gap-1">
-          <span className="text-sm opacity-80">Il tuo codice</span>
-          <div className="flex gap-1.5">
-            <input
-              className="pixel-input font-mono text-sm"
-              value={codiceDispositivo}
-              readOnly
-              onFocus={(e) => e.target.select()}
-            />
+        <ul className="mt-3 flex flex-col gap-1.5">
+          {libri.map((l) => (
+            <li
+              key={l.codice}
+              className="rounded-xl border border-[var(--color-cream-dark)] bg-[var(--color-cream)] px-3 py-2"
+            >
+              {inRinomina === l.codice ? (
+                <div className="flex gap-1.5">
+                  <input
+                    className="pixel-input text-sm"
+                    value={nomeRinomina}
+                    onChange={(e) => setNomeRinomina(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        confermaRinomina(l.codice);
+                      }
+                    }}
+                    autoFocus
+                  />
+                  <button
+                    type="button"
+                    className="pixel-btn pixel-btn-ochre px-3 text-xs"
+                    onClick={() => confermaRinomina(l.codice)}
+                    disabled={caricando}
+                  >
+                    OK
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between gap-2">
+                  <button
+                    type="button"
+                    className="flex-1 truncate text-left"
+                    onClick={() => l.modificabile && onImpostaAttivo(l.codice)}
+                    title={l.modificabile ? "Imposta come libro attivo" : undefined}
+                  >
+                    <span className="text-base">
+                      {l.codice === libroAttivo ? "● " : "○ "}
+                      {l.nome}
+                    </span>
+                    <span className="ml-1 font-mono text-xs opacity-60">
+                      {l.codice}
+                      {!l.modificabile && " · sola lettura"}
+                    </span>
+                  </button>
+                  <div className="flex shrink-0 gap-1">
+                    <button
+                      type="button"
+                      className="pixel-btn pixel-btn-ottanio px-2 py-1 text-[10px]"
+                      onClick={() => copiaCodice(l.codice)}
+                    >
+                      Copia
+                    </button>
+                    {l.modificabile && (
+                      <button
+                        type="button"
+                        className="pixel-btn pixel-btn-ottanio px-2 py-1 text-[10px]"
+                        onClick={() => iniziaRinomina(l)}
+                      >
+                        Rinomina
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      className="pixel-btn pixel-btn-wood px-2 py-1 text-[10px]"
+                      onClick={() => onRimuovi(l.codice)}
+                    >
+                      Rimuovi
+                    </button>
+                  </div>
+                </div>
+              )}
+            </li>
+          ))}
+        </ul>
+
+        {errore && (
+          <p className="mt-2 text-sm font-bold text-[var(--color-tomato)]">{errore}</p>
+        )}
+
+        {formAperto === "nessuno" && (
+          <div className="mt-3 flex gap-2">
             <button
               type="button"
-              className="pixel-btn pixel-btn-ottanio px-3 text-xs"
-              onClick={copiaCodice}
-            >
-              {copiato ? "Copiato!" : "Copia"}
-            </button>
-          </div>
-        </div>
-
-        <div className="mt-3 flex flex-col gap-1">
-          <span className="text-sm opacity-80">Aggiungi un libro esistente</span>
-          <div className="flex gap-1.5">
-            <input
-              className="pixel-input text-sm"
-              placeholder="Incolla qui un codice"
-              value={nuovoCodice}
-              onChange={(e) => setNuovoCodice(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  handleAggiungi();
-                }
+              className="pixel-btn pixel-btn-ochre flex-1 py-2 text-sm"
+              onClick={() => {
+                setFormAperto("crea");
+                setErrore(null);
               }}
-            />
+            >
+              Nuovo libro
+            </button>
             <button
               type="button"
-              className="pixel-btn pixel-btn-ochre px-3 text-xs"
-              onClick={handleAggiungi}
+              className="pixel-btn pixel-btn-ottanio flex-1 py-2 text-sm"
+              onClick={() => {
+                setFormAperto("unisciti");
+                setErrore(null);
+              }}
             >
-              Aggiungi
+              Aggiungi esistente
             </button>
           </div>
-        </div>
+        )}
 
-        <div className="mt-3 flex flex-col gap-1">
-          <span className="text-sm opacity-80">
-            Libri seguiti (tocca per salvare le nuove ricette li')
-          </span>
-          <ul className="flex flex-col gap-1.5">
-            {libri.map((codice) => (
-              <li
-                key={codice}
-                className="flex items-center justify-between gap-2 rounded-xl border border-[var(--color-cream-dark)] bg-[var(--color-cream)] px-3 py-2"
+        {formAperto === "crea" && (
+          <div className="mt-3 flex flex-col gap-2">
+            <input
+              className="pixel-input"
+              placeholder="Nome del nuovo libro"
+              value={nomeNuovo}
+              onChange={(e) => setNomeNuovo(e.target.value)}
+            />
+            <input
+              type="password"
+              className="pixel-input"
+              placeholder="Password (opzionale)"
+              value={passwordNuovo}
+              onChange={(e) => setPasswordNuovo(e.target.value)}
+            />
+            <div className="flex gap-2">
+              <button
+                type="button"
+                className="pixel-btn pixel-btn-wood flex-1 py-2 text-sm"
+                onClick={() => setFormAperto("nessuno")}
               >
-                <button
-                  type="button"
-                  className="flex-1 truncate text-left font-mono text-sm"
-                  onClick={() => onImpostaAttivo(codice)}
-                  title={codice}
-                >
-                  {codice === libroAttivo ? "● " : "○ "}
-                  {codice}
-                </button>
-                <button
-                  type="button"
-                  className="pixel-btn pixel-btn-wood px-2 py-1 text-[10px]"
-                  onClick={() => onRimuoviLibro(codice)}
-                  disabled={libri.length === 1}
-                >
-                  Rimuovi
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
+                Annulla
+              </button>
+              <button
+                type="button"
+                className="pixel-btn pixel-btn-ochre flex-1 py-2 text-sm"
+                onClick={handleCrea}
+                disabled={caricando}
+              >
+                Crea
+              </button>
+            </div>
+          </div>
+        )}
+
+        {formAperto === "unisciti" && (
+          <div className="mt-3 flex flex-col gap-2">
+            <input
+              className="pixel-input font-mono"
+              placeholder="Codice del libro"
+              value={codiceUnione}
+              onChange={(e) => setCodiceUnione(e.target.value)}
+            />
+            <input
+              type="password"
+              className="pixel-input"
+              placeholder="Password (solo per poter scrivere)"
+              value={passwordUnione}
+              onChange={(e) => setPasswordUnione(e.target.value)}
+            />
+            <div className="flex gap-2">
+              <button
+                type="button"
+                className="pixel-btn pixel-btn-wood flex-1 py-2 text-sm"
+                onClick={() => setFormAperto("nessuno")}
+              >
+                Annulla
+              </button>
+              <button
+                type="button"
+                className="pixel-btn pixel-btn-ottanio flex-1 py-2 text-sm"
+                onClick={handleUnisciti}
+                disabled={caricando}
+              >
+                Aggiungi
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

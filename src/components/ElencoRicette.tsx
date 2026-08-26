@@ -7,10 +7,12 @@ export function ElencoRicette({
   ricette,
   onElimina,
   onChiudi,
+  libriModificabili,
 }: {
   ricette: Ricetta[];
   onElimina: (id: string) => Promise<void>;
   onChiudi: () => void;
+  libriModificabili: string[];
 }) {
   const [tipo, setTipo] = useState<Tipo>("mie");
   const [eliminando, setEliminando] = useState<string | null>(null);
@@ -81,7 +83,7 @@ export function ElencoRicette({
                   </p>
                 </div>
               </div>
-              {!r.standard && (
+              {!r.standard && r.libro && libriModificabili.includes(r.libro) && (
                 <button
                   className="pixel-btn pixel-btn-wood px-2 py-1 text-[10px]"
                   onClick={() => handleElimina(r.id)}

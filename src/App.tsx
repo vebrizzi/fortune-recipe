@@ -4,27 +4,36 @@ import { Filters } from "./components/Filters";
 import { AggiungiRicetta } from "./components/AggiungiRicetta";
 import { ElencoRicette } from "./components/ElencoRicette";
 import { Impostazioni } from "./components/Impostazioni";
+import { Onboarding } from "./components/Onboarding";
 import {
-  aggiungiLibro,
+  aggiungiOAggiornaLibro,
+  generaCodiceLibro,
   getDeviceId,
   getLibri,
   getLibroAttivo,
   rimuoviLibro,
   setLibroAttivo,
+  type LibroLocale,
 } from "./lib/device";
 import {
+  creaLibro,
   creaRicetta,
   eliminaRicetta,
   fetchImpostazioni,
   fetchRicetteStandard,
   fetchRicetteUtente,
+  ottieniLibri,
+  rinominaLibro,
   salvaImpostazioni,
+  verificaPasswordLibro,
   TAG_BASE,
   type Categoria,
   type Ricetta,
 } from "./lib/recipes";
 
 const MAX_PIATTI = 4;
+
+type RisultatoUnione = { ok: true } | { ok: false; messaggio: string };
 
 type PiattoSlot = {
   categoria: Categoria | null;
@@ -41,8 +50,9 @@ function nuovoSlot(): PiattoSlot {
 export default function App() {
   const deviceId = useMemo(() => getDeviceId(), []);
 
-  const [libri, setLibri] = useState<string[]>(() => getLibri());
-  const [libroAttivo, setLibroAttivoState] = useState<string>(() => getLibroAttivo());
+  const [libri, setLibri] = useState<LibroLocale[]>(() => getLibri());
+  const [libroAttivo, setLibroAttivoState] = useState<string | null>(() => getLibroAttivo());
+  const mostraOnboarding = libri.length === 0;
 
   const [ricette, setRicette] = useState<Ricetta[]>([]);
   const [usaStandard, setUsaStandard] = useState(true);
@@ -56,12 +66,17 @@ export default function App() {
   const [mostraElenco, setMostraElenco] = useState(false);
   const [mostraOpzioni, setMostraOpzioni] = useState(false);
 
-  async function ricarica(libriDaUsare: string[] = libri) {
+  const libriModificabili = useMemo(
+    () => libri.filter((l) => l.modificabile).map((l) => l.codice),
+    [libri]
+  );
+
+  async function ricarica(codici: string[] = libri.map((l) => l.codice)) {
     setCaricando(true);
     setErroreCaricamento(null);
     try {
       const [mie, standard, opzioni] = await Promise.all([
-        fetchRicetteUtente(libriDaUsare),
+        fetchRicetteUtente(codici),
         fetchRicetteStandard(),
         fetchImpostazioni(deviceId),
       ]);
@@ -156,26 +171,69 @@ export default function App() {
     pasto: Categoria[];
     tag: string[];
   }) {
+    if (!libroAttivo) throw new Error("Nessun libro attivo su cui salvare la ricetta.");
     await creaRicetta({ deviceId, libro: libroAttivo, ...input });
     await ricarica();
   }
 
   async function handleElimina(id: string) {
-    await eliminaRicetta(id, libri);
+    await eliminaRicetta(id, libriModificabili);
     await ricarica();
   }
 
-  function handleAggiungiLibro(codice: string) {
-    const nuovi = aggiungiLibro(codice);
-    setLibri(nuovi);
-    ricarica(nuovi);
+  /** Crea un nuovo libro (usato sia dall'onboarding sia dalle Opzioni). */
+  async function handleCreaLibro(nome: string, password?: string) {
+    const codice = generaCodiceLibro();
+    await creaLibro(codice, nome, password);
+    const aggiornati = aggiungiOAggiornaLibro({ codice, nome, modificabile: true });
+    setLibri(aggiornati);
+    setLibroAttivo(codice);
+    setLibroAttivoState(codice);
+    await ricarica(aggiornati.map((l) => l.codice));
+  }
+
+  /** Segue un libro esistente: in collaborazione se la password fornita e' corretta, altrimenti in sola lettura. */
+  async function handleUnisciti(codice: string, password?: string): Promise<RisultatoUnione> {
+    const info = await ottieniLibri([codice]);
+    const trovato = info[0];
+    if (!trovato) {
+      return { ok: false, messaggio: "Codice non trovato." };
+    }
+    let modificabile = !trovato.protetto;
+    if (trovato.protetto && password && password.trim()) {
+      const corretta = await verificaPasswordLibro(codice, password);
+      if (!corretta) {
+        return {
+          ok: false,
+          messaggio: "Password errata. Lascia il campo vuoto per seguire in sola lettura.",
+        };
+      }
+      modificabile = true;
+    }
+    const aggiornati = aggiungiOAggiornaLibro({ codice, nome: trovato.nome, modificabile });
+    setLibri(aggiornati);
+    if (modificabile && !getLibroAttivo()) setLibroAttivo(codice);
+    setLibroAttivoState(getLibroAttivo());
+    await ricarica(aggiornati.map((l) => l.codice));
+    return { ok: true };
+  }
+
+  async function handleRinominaLibro(codice: string, nome: string) {
+    await rinominaLibro(codice, nome);
+    const esistente = libri.find((l) => l.codice === codice);
+    const aggiornati = aggiungiOAggiornaLibro({
+      codice,
+      nome,
+      modificabile: esistente?.modificabile ?? true,
+    });
+    setLibri(aggiornati);
   }
 
   function handleRimuoviLibro(codice: string) {
-    const nuovi = rimuoviLibro(codice);
-    setLibri(nuovi);
+    const aggiornati = rimuoviLibro(codice);
+    setLibri(aggiornati);
     setLibroAttivoState(getLibroAttivo());
-    ricarica(nuovi);
+    ricarica(aggiornati.map((l) => l.codice));
   }
 
   function handleImpostaAttivo(codice: string) {
@@ -293,8 +351,10 @@ export default function App() {
 
       <button
         className="pixel-fab"
-        onClick={() => setMostraAggiungi(true)}
+        onClick={() => libroAttivo && setMostraAggiungi(true)}
         aria-label="Aggiungi ricetta"
+        style={libroAttivo ? undefined : { opacity: 0.5, cursor: "not-allowed" }}
+        title={libroAttivo ? undefined : "Nessun libro modificabile: creane o aggiungine uno dalle Opzioni"}
       >
         +
       </button>
@@ -311,6 +371,7 @@ export default function App() {
           ricette={ricette}
           onElimina={handleElimina}
           onChiudi={() => setMostraElenco(false)}
+          libriModificabili={libriModificabili}
         />
       )}
 
@@ -319,13 +380,18 @@ export default function App() {
           usaStandard={usaStandard}
           onCambia={handleCambiaOpzioni}
           onChiudi={() => setMostraOpzioni(false)}
-          codiceDispositivo={deviceId}
           libri={libri}
           libroAttivo={libroAttivo}
-          onAggiungiLibro={handleAggiungiLibro}
-          onRimuoviLibro={handleRimuoviLibro}
           onImpostaAttivo={handleImpostaAttivo}
+          onRimuovi={handleRimuoviLibro}
+          onRinomina={handleRinominaLibro}
+          onCrea={handleCreaLibro}
+          onUnisciti={handleUnisciti}
         />
+      )}
+
+      {mostraOnboarding && (
+        <Onboarding onCrea={handleCreaLibro} onUnisciti={handleUnisciti} />
       )}
     </div>
   );

@@ -93,9 +93,47 @@ export type Database = {
         };
         Relationships: [];
       };
+      libri: {
+        Row: {
+          codice: string;
+          nome: string;
+          password_hash: string | null;
+          created_at: string;
+        };
+        Insert: {
+          codice: string;
+          nome?: string;
+          password_hash?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          codice?: string;
+          nome?: string;
+          password_hash?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
-    Functions: Record<string, never>;
+    Functions: {
+      crea_libro: {
+        Args: { p_codice: string; p_nome: string; p_password?: string | null };
+        Returns: void;
+      };
+      rinomina_libro: {
+        Args: { p_codice: string; p_nome: string };
+        Returns: void;
+      };
+      verifica_password_libro: {
+        Args: { p_codice: string; p_password: string };
+        Returns: boolean;
+      };
+      libri_info: {
+        Args: { p_codici: string[] };
+        Returns: { codice: string; nome: string; protetto: boolean }[];
+      };
+    };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;
   };

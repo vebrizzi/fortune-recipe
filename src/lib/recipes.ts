@@ -34,13 +34,14 @@ export type Ricetta = {
   pasto: string[];
   tag: string[];
   standard: boolean;
+  libro: string | null;
 };
 
 export async function fetchRicetteUtente(libri: string[]): Promise<Ricetta[]> {
   if (libri.length === 0) return [];
   const { data, error } = await supabase
     .from("ricette_utente")
-    .select("id, nome, ingredienti, procedimento, pasto, tag")
+    .select("id, nome, ingredienti, procedimento, pasto, tag, libro")
     .in("libro", libri)
     .order("created_at", { ascending: false });
   if (error) throw error;
@@ -63,6 +64,7 @@ export async function fetchRicetteStandard(): Promise<Ricetta[]> {
     pasto: r.pasto ?? [],
     tag: r.tag ?? [],
     standard: true,
+    libro: null,
   }));
 }
 
@@ -86,6 +88,41 @@ export async function salvaImpostazioni(deviceId: string, usaStandard: boolean) 
     { onConflict: "device_id" }
   );
   if (error) throw error;
+}
+
+export type LibroInfo = { codice: string; nome: string; protetto: boolean };
+
+/** Recupera nome ed eventuale protezione da password dei libri indicati. */
+export async function ottieniLibri(codici: string[]): Promise<LibroInfo[]> {
+  if (codici.length === 0) return [];
+  const { data, error } = await supabase.rpc("libri_info", { p_codici: codici });
+  if (error) throw error;
+  return data ?? [];
+}
+
+/** Crea un nuovo libro con un codice non ancora usato (no-op se il codice esiste gia'). */
+export async function creaLibro(codice: string, nome: string, password?: string) {
+  const { error } = await supabase.rpc("crea_libro", {
+    p_codice: codice,
+    p_nome: nome,
+    p_password: password && password.trim() ? password : null,
+  });
+  if (error) throw error;
+}
+
+export async function rinominaLibro(codice: string, nome: string) {
+  const { error } = await supabase.rpc("rinomina_libro", { p_codice: codice, p_nome: nome });
+  if (error) throw error;
+}
+
+/** true se il libro non ha password, oppure se la password inserita e' corretta. */
+export async function verificaPasswordLibro(codice: string, password: string): Promise<boolean> {
+  const { data, error } = await supabase.rpc("verifica_password_libro", {
+    p_codice: codice,
+    p_password: password,
+  });
+  if (error) throw error;
+  return data === true;
 }
 
 export async function creaRicetta(input: {

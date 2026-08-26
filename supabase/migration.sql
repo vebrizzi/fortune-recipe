@@ -104,3 +104,87 @@ alter table public.ricette_utente alter column libro set not null;
 
 create index if not exists ricette_utente_libro_idx
   on public.ricette_utente (libro);
+
+-- 7) Nome e password (opzionale) per ogni libro. La password serve solo a
+--    distinguere chi puo' scrivere ("collaborazione") da chi segue in
+--    sola lettura: e' un cancelletto lato applicazione, non una vera
+--    barriera crittografica lato database (le righe di ricette_utente
+--    restano leggibili/scrivibili da chiunque conosca il codice, come
+--    documentato sopra). La password non transita mai in chiaro verso il
+--    client: viene hashata con pgcrypto dentro le funzioni sotto.
+create table if not exists public.libri (
+  codice text primary key,
+  nome text not null default 'Il mio libro',
+  password_hash text,
+  created_at timestamptz not null default now()
+);
+
+alter table public.libri enable row level security;
+
+-- Backfill: crea una riga "libri" per ogni codice gia' in uso da versioni
+-- precedenti, cosi' chi aggiorna non perde l'elenco dei propri libri.
+insert into public.libri (codice, nome)
+select distinct libro, 'Il mio libro' from public.ricette_utente
+where libro is not null
+on conflict (codice) do nothing;
+
+-- Nessun accesso diretto alla tabella dal client: si passa sempre dalle
+-- funzioni sotto, cosi' l'hash della password non viene mai esposto.
+revoke all on public.libri from anon, authenticated;
+
+create or replace function public.crea_libro(p_codice text, p_nome text, p_password text default null)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  insert into public.libri (codice, nome, password_hash)
+  values (
+    p_codice,
+    coalesce(nullif(trim(p_nome), ''), 'Il mio libro'),
+    case when p_password is null or trim(p_password) = '' then null
+         else crypt(p_password, gen_salt('bf')) end
+  )
+  on conflict (codice) do nothing;
+end;
+$$;
+
+create or replace function public.rinomina_libro(p_codice text, p_nome text)
+returns void
+language sql
+security definer
+set search_path = public
+as $$
+  update public.libri set nome = coalesce(nullif(trim(p_nome), ''), nome)
+  where codice = p_codice;
+$$;
+
+create or replace function public.verifica_password_libro(p_codice text, p_password text)
+returns boolean
+language sql
+security definer
+set search_path = public
+as $$
+  select coalesce(
+    (select password_hash is null or password_hash = crypt(p_password, password_hash)
+     from public.libri where codice = p_codice),
+    false
+  );
+$$;
+
+create or replace function public.libri_info(p_codici text[])
+returns table(codice text, nome text, protetto boolean)
+language sql
+security definer
+set search_path = public
+as $$
+  select codice, nome, (password_hash is not null) as protetto
+  from public.libri
+  where codice = any(p_codici);
+$$;
+
+grant execute on function public.crea_libro(text, text, text) to anon, authenticated;
+grant execute on function public.rinomina_libro(text, text) to anon, authenticated;
+grant execute on function public.verifica_password_libro(text, text) to anon, authenticated;
+grant execute on function public.libri_info(text[]) to anon, authenticated;

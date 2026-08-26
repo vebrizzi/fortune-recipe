@@ -25,14 +25,19 @@ dati su Supabase (Postgres).
 - Opzione "Usa anche le ricette standard": se disattivata, la ruota usa
   solo le ricette create dall'utente su quel dispositivo.
 - Nessun account: ogni dispositivo/browser ha un id casuale salvato in
-  `localStorage`, usato per le impostazioni e come "libro di ricette"
-  personale di default.
-- **Libri di ricette**: le ricette proprie vivono in un "libro"
-  identificato da un codice. Un dispositivo puo' seguire piu' libri
-  (il proprio + eventuali altri aggiunti incollando un codice preso da
-  un altro dispositivo/persona): le ricette si vedono da tutti i libri
-  seguiti, quelle nuove si salvano sul libro scelto come attivo. Si
-  gestisce dal pannello Opzioni.
+  `localStorage`, usato solo per le impostazioni e per registrare quale
+  dispositivo ha creato ogni ricetta.
+- **Libri di ricette con nome**: le ricette proprie vivono in un "libro"
+  con un nome e un codice breve (es. `K3F9QZ`). Al primo avvio l'app
+  chiede se creare un nuovo libro o unirsi a uno esistente incollandone
+  il codice.
+- **Collaborazione opzionale con password**: un libro puo' avere una
+  password. Chi la conosce si unisce in "collaborazione" (puo' anche
+  scrivere/eliminare ricette); chi non la mette, o non la conosce, segue
+  il libro in **sola lettura**. Un dispositivo puo' seguire piu' libri
+  insieme; le nuove ricette si salvano sempre sul libro scelto come
+  attivo. Tutto si gestisce dal pannello Opzioni (rinomina, aggiungi,
+  cambia libro attivo, smetti di seguire).
 
 ## Struttura del progetto
 
@@ -43,13 +48,14 @@ src/
     device.ts                id dispositivo + libri di ricette seguiti (localStorage)
     supabase.ts              client Supabase (da variabili d'ambiente)
     database.types.ts        tipi TypeScript dello schema Postgres
-    recipes.ts                tipi ricetta, CRUD, mappa icone
+    recipes.ts                tipi ricetta, CRUD, gestione libri, mappa icone
   components/
     Wheel.tsx                 la ruota SVG animata
     Filters.tsx                filtro pasto + tag a tendina
     AggiungiRicetta.tsx         form di creazione ricetta
     ElencoRicette.tsx           elenco/gestione ricette
-    Impostazioni.tsx            toggle ricette standard
+    Impostazioni.tsx            toggle ricette standard + gestione libri
+    Onboarding.tsx              scelta iniziale "crea libro" / "unisciti"
 supabase/
   migration.sql               migrazione da eseguire sul progetto Supabase esistente
 ```
@@ -59,21 +65,30 @@ supabase/
 Il progetto e' collegato al Supabase dedicato `fortunerecipe`
 (`jceaixxavftisrjbzyqk`). Prima di avviare l'app, apri l'SQL editor del
 progetto Supabase e incolla il contenuto di `supabase/migration.sql`.
-Lo script crea le tabelle `ricette_standard`, `ricette_utente` (con la
-colonna `libro`, che raggruppa le ricette in "libri" seguibili da piu'
-dispositivi) e `impostazioni_dispositivo`, con RLS aperta e filtrata
-lato applicazione. E' idempotente: puoi eseguirlo anche piu' volte
-senza rischi, anche per aggiornare un progetto gia' esistente a una
-versione precedente dello schema.
+Lo script crea:
+- `ricette_standard`, `ricette_utente` (con la colonna `libro`, che
+  raggruppa le ricette in "libri") e `impostazioni_dispositivo`;
+- `libri` (codice, nome, password hashata con pgcrypto) e le funzioni
+  `crea_libro`, `rinomina_libro`, `verifica_password_libro`,
+  `libri_info`, usate dal client al posto di leggere/scrivere la
+  tabella direttamente (cosi' l'hash della password non transita mai
+  verso il browser).
 
-> Nota sulla sicurezza: le policy RLS attuali (`USING (true)`) permettono
-> a chiunque conosca la chiave pubblica di leggere/scrivere righe di
-> qualunque `libro` o `device_id`, non solo il proprio: l'isolamento e'
-> solo convenzionale lato client, non garantito dal database. Il codice
-> di un libro va quindi trattato come una password leggera da non
-> condividere pubblicamente. Per un'app di ricette personali e' un
-> compromesso accettabile, ma e' bene saperlo - non e' "privacy vera",
-> e' "privacy per obscurity".
+E' idempotente: puoi eseguirlo anche piu' volte senza rischi, anche per
+aggiornare un progetto gia' esistente a una versione precedente dello
+schema.
+
+> Nota sulla sicurezza: le policy RLS su `ricette_utente` (`USING (true)`)
+> permettono a chiunque conosca il codice di un libro di leggerne e
+> scriverne le ricette direttamente via API, indipendentemente dalla
+> password. La password su un libro e' quindi un **cancelletto lato
+> applicazione** (impedisce che l'app stessa proponga la scrittura a chi
+> non la conosce, e la sua versione hashata non lascia mai il database),
+> non una barriera crittografica reale sui dati: chi ha davvero brutte
+> intenzioni e conosce il codice potrebbe comunque scrivere bypassando
+> l'app. Per un'app di ricette personali/famigliari e' un compromesso
+> accettabile, ma e' bene saperlo - non e' "privacy vera", e' "privacy
+> per obscurity" con in piu' un piccolo ostacolo di cortesia.
 
 ## 2. Sviluppo locale
 
