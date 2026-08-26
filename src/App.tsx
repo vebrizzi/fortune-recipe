@@ -17,7 +17,7 @@ import {
   type Ricetta,
 } from "./lib/recipes";
 
-const MAX_PIATTI = 6;
+const MAX_PIATTI = 4;
 
 type PiattoSlot = {
   categoria: Categoria | null;
@@ -91,6 +91,9 @@ export default function App() {
     [piatti, ricette]
   );
 
+  const staGirando = piattiConRicette.some((s) => s.spinning);
+  const nessunaRicettaDisponibile = piattiConRicette.every((s) => s.filtrate.length === 0);
+
   function generaRuote() {
     setPiatti(Array.from({ length: numeroPiatti }, nuovoSlot));
   }
@@ -99,11 +102,15 @@ export default function App() {
     setPiatti((prev) => prev.map((s, idx) => (idx === i ? { ...s, ...patch } : s)));
   }
 
-  function girala(i: number) {
-    const slot = piattiConRicette[i];
-    if (!slot || slot.filtrate.length === 0 || slot.spinning) return;
-    const idx = Math.floor(Math.random() * slot.filtrate.length);
-    aggiornaSlot(i, { risultato: null, targetIndex: idx, spinning: true });
+  function giraleTutte() {
+    setPiatti((prev) =>
+      prev.map((slot, i) => {
+        const filtrate = piattiConRicette[i]?.filtrate ?? [];
+        if (filtrate.length === 0 || slot.spinning) return { ...slot, risultato: null };
+        const idx = Math.floor(Math.random() * filtrate.length);
+        return { ...slot, risultato: null, targetIndex: idx, spinning: true };
+      })
+    );
   }
 
   function onSettled(i: number) {
@@ -140,29 +147,27 @@ export default function App() {
   }
 
   return (
-    <div className="scanlines min-h-screen px-4 py-6">
+    <div className="min-h-screen px-4 py-6">
       <header className="mx-auto mb-6 max-w-md text-center">
-        <h1 className="pixel-font text-xl leading-relaxed text-[var(--color-crust)]">
-          Cosa mangio
-          <br />
-          oggi? 🎲
+        <h1 className="pixel-font text-3xl leading-relaxed text-[var(--color-crust)]">
+          Cosa mangio oggi? 🎲
         </h1>
         <button
-          className="pixel-btn pixel-btn-ottanio mt-3 px-3 py-2 text-[10px]"
+          className="pixel-btn pixel-btn-ottanio mt-3 px-4 py-2 text-sm"
           onClick={() => setMostraOpzioni(true)}
         >
           Opzioni
         </button>
       </header>
 
-      <main className="mx-auto flex max-w-md flex-col items-center gap-4">
+      <main className="mx-auto flex max-w-6xl flex-col items-center gap-4">
         {erroreCaricamento && (
-          <div className="pixel-panel w-full p-3 text-center text-sm">
+          <div className="pixel-panel w-full max-w-md p-3 text-center text-sm">
             {erroreCaricamento}
           </div>
         )}
 
-        <div className="pixel-panel flex w-full flex-col gap-2 p-3">
+        <div className="pixel-panel flex w-full max-w-md flex-col gap-2 p-4">
           <span className="text-sm opacity-80">Quanti piatti vuoi generare?</span>
           <div className="flex items-center gap-2">
             <input
@@ -179,7 +184,7 @@ export default function App() {
             />
             <button
               type="button"
-              className="pixel-btn pixel-btn-ottanio flex-1 px-3 py-2 text-xs"
+              className="pixel-btn pixel-btn-ottanio flex-1 px-3 py-2 text-sm"
               onClick={generaRuote}
             >
               Genera ruote
@@ -189,62 +194,67 @@ export default function App() {
 
         {caricando && <p className="text-sm opacity-70">Carico le ricette...</p>}
 
-        {!caricando &&
-          piattiConRicette.map((slot, i) => (
-            <div
-              key={i}
-              className="pixel-panel flex w-full flex-col items-center gap-3 p-3"
-            >
-              <h2 className="pixel-font text-xs">Piatto {i + 1}</h2>
+        {!caricando && (
+          <button
+            className="pixel-btn pixel-btn-ochre w-full max-w-md py-4 text-lg"
+            onClick={giraleTutte}
+            disabled={staGirando || nessunaRicettaDisponibile}
+          >
+            {staGirando ? "Sto girando..." : "Cosa mangio oggi?"}
+          </button>
+        )}
 
-              <Filters
-                pasto={slot.categoria}
-                setPasto={(c) => aggiornaSlot(i, { categoria: c })}
-                tagDisponibili={tagDisponibili}
-                tagSelezionati={slot.tag}
-                setTagSelezionati={(t) => aggiornaSlot(i, { tag: t })}
-              />
-
-              <p className="text-sm opacity-70">
-                {slot.filtrate.length} ricett{slot.filtrate.length === 1 ? "a" : "e"}{" "}
-                disponibili
-              </p>
-
-              <Wheel
-                items={slot.filtrate}
-                spinning={slot.spinning}
-                targetIndex={slot.targetIndex}
-                onSettled={() => onSettled(i)}
-              />
-
-              <button
-                className="pixel-btn pixel-btn-ochre w-full max-w-[19rem] py-4 text-sm"
-                onClick={() => girala(i)}
-                disabled={slot.spinning || slot.filtrate.length === 0}
+        {!caricando && (
+          <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            {piattiConRicette.map((slot, i) => (
+              <div
+                key={i}
+                className="pixel-panel flex w-full flex-col items-center gap-3 p-3"
               >
-                {slot.spinning ? "Sto girando..." : "Cosa mangio oggi?"}
-              </button>
+                <h2 className="pixel-font text-lg">Piatto {i + 1}</h2>
 
-              {slot.risultato && !slot.spinning && (
-                <div className="pixel-panel w-full max-w-[19rem] p-4 text-center">
-                  <p className="text-sm opacity-70">Oggi si mangia:</p>
-                  <p className="pixel-font mt-2 text-base">{slot.risultato.nome}</p>
-                  {slot.risultato.ingredienti && (
-                    <p className="mt-2 text-left text-base">
-                      <span className="opacity-70">Ingredienti: </span>
-                      {slot.risultato.ingredienti}
-                    </p>
-                  )}
-                  {slot.risultato.procedimento && (
-                    <p className="mt-2 text-left text-base">
-                      <span className="opacity-70">Procedimento: </span>
-                      {slot.risultato.procedimento}
-                    </p>
-                  )}
-                </div>
-              )}
-            </div>
-          ))}
+                <Filters
+                  pasto={slot.categoria}
+                  setPasto={(c) => aggiornaSlot(i, { categoria: c })}
+                  tagDisponibili={tagDisponibili}
+                  tagSelezionati={slot.tag}
+                  setTagSelezionati={(t) => aggiornaSlot(i, { tag: t })}
+                />
+
+                <p className="text-sm opacity-70">
+                  {slot.filtrate.length} ricett{slot.filtrate.length === 1 ? "a" : "e"}{" "}
+                  disponibili
+                </p>
+
+                <Wheel
+                  items={slot.filtrate}
+                  spinning={slot.spinning}
+                  targetIndex={slot.targetIndex}
+                  onSettled={() => onSettled(i)}
+                />
+
+                {slot.risultato && !slot.spinning && (
+                  <div className="pixel-panel w-full max-w-[19rem] p-4 text-center">
+                    <p className="text-sm opacity-70">Oggi si mangia:</p>
+                    <p className="pixel-font mt-1 text-xl">{slot.risultato.nome}</p>
+                    {slot.risultato.ingredienti && (
+                      <p className="mt-2 text-left text-base">
+                        <span className="opacity-70">Ingredienti: </span>
+                        {slot.risultato.ingredienti}
+                      </p>
+                    )}
+                    {slot.risultato.procedimento && (
+                      <p className="mt-2 text-left text-base">
+                        <span className="opacity-70">Procedimento: </span>
+                        {slot.risultato.procedimento}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
 
         <button
           className="text-sm underline opacity-70"

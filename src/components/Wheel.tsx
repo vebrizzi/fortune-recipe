@@ -2,9 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { iconaRicetta, type Ricetta } from "../lib/recipes";
 
 const COLORS = [
-  "var(--color-ochre)",
-  "var(--color-tomato)",
-  "var(--color-ottanio)",
+  "var(--color-ochre-light)",
+  "var(--color-tomato-light)",
+  "var(--color-ottanio-light)",
   "var(--color-wood-light)",
 ];
 
@@ -51,34 +51,34 @@ export function Wheel({
   const total = Math.max(items.length, 1);
 
   return (
-    <div className="relative mx-auto aspect-square w-full max-w-[19rem]">
-      <div className="absolute left-1/2 top-[-10px] z-10 h-0 w-0 -translate-x-1/2 border-x-[14px] border-t-[24px] border-x-transparent border-t-[var(--color-crust)]" />
-      <div className="absolute left-1/2 top-[-6px] z-10 h-0 w-0 -translate-x-1/2 border-x-[10px] border-t-[18px] border-x-transparent border-t-[var(--color-tomato)]" />
+    <div className="relative mx-auto aspect-square w-full max-w-[19rem] drop-shadow-md">
+      <div className="absolute left-1/2 top-[-4px] z-10 h-0 w-0 -translate-x-1/2 border-x-[11px] border-t-[20px] border-x-transparent border-t-[var(--color-tomato)]" />
       <svg
         viewBox="0 0 200 200"
         className="wheel-spin h-full w-full"
         style={{ transform: `rotate(${angle}deg)` }}
       >
-        <circle cx="100" cy="100" r="99" fill="var(--color-paper)" stroke="var(--color-crust)" strokeWidth="4" />
+        <circle cx="100" cy="100" r="98" fill="var(--color-paper)" stroke="var(--color-cream-dark)" strokeWidth="2" />
         {items.map((r, i) => {
           const step = 360 / total;
           const mid = i * step + step / 2;
-          const [tx, ty] = polar(100, 100, 68, mid);
+          const [tx, ty] = polar(100, 100, 66, mid);
           return (
             <g key={r.id}>
               <path
                 d={slicePath(i, total)}
                 fill={COLORS[i % COLORS.length]}
-                stroke="var(--color-crust)"
+                stroke="var(--color-paper)"
                 strokeWidth="2"
               />
               <text
                 x={tx}
                 y={ty}
-                fontSize="16"
+                fontSize="26"
                 textAnchor="middle"
                 dominantBaseline="middle"
                 transform={`rotate(${mid} ${tx} ${ty})`}
+                style={{ filter: "drop-shadow(0 1px 1px rgba(43,24,16,0.25))" }}
               >
                 {iconaRicetta(r)}
               </text>
@@ -89,7 +89,7 @@ export function Wheel({
           <text
             x="100"
             y="100"
-            fontSize="9"
+            fontSize="12"
             textAnchor="middle"
             fill="var(--color-crust)"
             className="pixel-font"
@@ -97,7 +97,7 @@ export function Wheel({
             Nessuna ricetta
           </text>
         )}
-        <circle cx="100" cy="100" r="18" fill="var(--color-cream)" stroke="var(--color-crust)" strokeWidth="4" />
+        <circle cx="100" cy="100" r="16" fill="var(--color-cream)" stroke="var(--color-cream-dark)" strokeWidth="2" />
       </svg>
     </div>
   );
