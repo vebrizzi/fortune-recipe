@@ -155,48 +155,73 @@ export async function eliminaRicetta(id: string, libri: string[]) {
   if (error) throw error;
 }
 
+export type IconaChiave =
+  | "pasta"
+  | "pizza"
+  | "pollo"
+  | "pesce"
+  | "insalata"
+  | "uova"
+  | "zuppa"
+  | "curry"
+  | "riso"
+  | "pancake"
+  | "yogurt"
+  | "toast"
+  | "hummus"
+  | "frutta"
+  | "popcorn"
+  | "bowl"
+  | "patate"
+  | "colazione"
+  | "main"
+  | "primo"
+  | "secondo"
+  | "contorno"
+  | "spuntino";
+
 /**
- * Associa un'icona pixel/emoji a una ricetta in base a parole chiave nel nome,
- * nei tag e nel pasto. Non mostriamo mai il nome della ricetta sulla ruota:
- * solo l'icona, per l'effetto "sorpresa" richiesto.
+ * Associa una ricetta a una chiave di icona illustrata in base a parole
+ * chiave nel nome (o, in mancanza, alla categoria). Non mostriamo mai il
+ * nome della ricetta sulla ruota: solo l'icona, per l'effetto "sorpresa".
  */
-const KEYWORD_ICONS: Array<{ keywords: string[]; icon: string }> = [
-  { keywords: ["pasta", "spaghett", "penne", "fusilli"], icon: "🍝" },
-  { keywords: ["pizza"], icon: "🍕" },
-  { keywords: ["pollo", "tacchino"], icon: "🍗" },
-  { keywords: ["salmone", "pesce", "tonno", "gamber"], icon: "🐟" },
-  { keywords: ["insalata"], icon: "🥗" },
-  { keywords: ["uov", "frittata"], icon: "🍳" },
-  { keywords: ["zuppa", "lenticchi", "minestr", "fagioli"], icon: "🍲" },
-  { keywords: ["curry"], icon: "🍛" },
-  { keywords: ["riso"], icon: "🍚" },
-  { keywords: ["pancake", "porridge", "avena"], icon: "🥞" },
-  { keywords: ["yogurt", "ricotta"], icon: "🥣" },
-  { keywords: ["toast", "panino", "pane"], icon: "🥪" },
-  { keywords: ["hummus", "ceci"], icon: "🧆" },
-  { keywords: ["mela", "frutt", "mandorle", "noci"], icon: "🍎" },
-  { keywords: ["popcorn"], icon: "🍿" },
-  { keywords: ["quinoa", "bowl"], icon: "🥙" },
-  { keywords: ["patate"], icon: "🥔" },
+const KEYWORD_ICONS: Array<{ keywords: string[]; chiave: IconaChiave }> = [
+  { keywords: ["pasta", "spaghett", "penne", "fusilli"], chiave: "pasta" },
+  { keywords: ["pizza"], chiave: "pizza" },
+  { keywords: ["pollo", "tacchino"], chiave: "pollo" },
+  { keywords: ["salmone", "pesce", "tonno", "gamber", "merluzzo"], chiave: "pesce" },
+  { keywords: ["insalata"], chiave: "insalata" },
+  { keywords: ["uov", "frittata"], chiave: "uova" },
+  { keywords: ["zuppa", "lenticchi", "minestr", "fagioli"], chiave: "zuppa" },
+  { keywords: ["curry"], chiave: "curry" },
+  { keywords: ["riso", "risotto"], chiave: "riso" },
+  { keywords: ["pancake", "porridge", "avena"], chiave: "pancake" },
+  { keywords: ["yogurt", "ricotta"], chiave: "yogurt" },
+  { keywords: ["toast", "panino", "pane", "burger"], chiave: "toast" },
+  { keywords: ["hummus", "ceci"], chiave: "hummus" },
+  { keywords: ["mela", "frutt", "mandorle", "noci", "cereali"], chiave: "frutta" },
+  { keywords: ["popcorn"], chiave: "popcorn" },
+  { keywords: ["quinoa", "bowl", "poke"], chiave: "bowl" },
+  { keywords: ["patate", "pure"], chiave: "patate" },
 ];
 
-const CATEGORIA_FALLBACK_ICON: Record<Categoria, string> = {
-  colazione: "☕",
-  main: "🍽️",
-  primo: "🍝",
-  secondo: "🍗",
-  contorno: "🥗",
-  spuntino: "🍪",
+const CATEGORIA_FALLBACK_ICONA: Record<Categoria, IconaChiave> = {
+  colazione: "colazione",
+  main: "main",
+  primo: "primo",
+  secondo: "secondo",
+  contorno: "contorno",
+  spuntino: "spuntino",
 };
 
-export function iconaRicetta(ricetta: Ricetta): string {
+export function chiaveIconaRicetta(ricetta: Ricetta): IconaChiave {
   const testo = ricetta.nome.toLowerCase();
   for (const entry of KEYWORD_ICONS) {
-    if (entry.keywords.some((k) => testo.includes(k))) return entry.icon;
+    if (entry.keywords.some((k) => testo.includes(k))) return entry.chiave;
   }
   const primaCategoria = ricetta.pasto[0] as Categoria | undefined;
-  if (primaCategoria && CATEGORIA_FALLBACK_ICON[primaCategoria]) {
-    return CATEGORIA_FALLBACK_ICON[primaCategoria];
+  if (primaCategoria && CATEGORIA_FALLBACK_ICONA[primaCategoria]) {
+    return CATEGORIA_FALLBACK_ICONA[primaCategoria];
   }
-  return "🍴";
+  return "main";
 }

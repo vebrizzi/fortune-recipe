@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { iconaRicetta, type Ricetta } from "../lib/recipes";
+import { chiaveIconaRicetta, type Ricetta } from "../lib/recipes";
+import { RecipeIcon } from "./RecipeIcon";
 
 type Tipo = "mie" | "tutte";
 
@@ -73,7 +74,9 @@ export function ElencoRicette({
               className="flex items-center justify-between rounded-2xl bg-[var(--color-cream-dark)] px-3 py-2"
             >
               <div className="flex items-center gap-2">
-                <span className="text-xl">{iconaRicetta(r)}</span>
+                <svg viewBox="-16 -16 32 32" className="h-8 w-8 shrink-0">
+                  <RecipeIcon chiave={chiaveIconaRicetta(r)} />
+                </svg>
                 <div>
                   <p className="leading-tight">{r.nome}</p>
                   <p className="text-sm opacity-60">

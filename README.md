@@ -1,8 +1,8 @@
 # Cosa mangio oggi? 🎲
 
-App "ruota della fortuna" stile 8-bit per decidere cosa cucinare, con
-ricette standard condivise e ricette personali per dispositivo (nessun
-login richiesto). Costruita con Vite + React + TypeScript + Tailwind CSS,
+App "ruota della fortuna" per decidere cosa cucinare, con ricette
+standard condivise e ricette personali per dispositivo (nessun login
+richiesto). Costruita con Vite + React + TypeScript + Tailwind CSS,
 dati su Supabase (Postgres).
 
 ## Cosa fa
@@ -11,9 +11,11 @@ dati su Supabase (Postgres).
   il numero di ruote indipendenti mostrate (una per piatto, ciascuna
   con i propri filtri), centrate e disposte in orizzontale su schermi
   larghi, impilate su mobile.
-- Un solo bottone "Cosa mangio oggi?" fa girare **tutte** le ruote
-  contemporaneamente, estraendo una ricetta a caso per ciascun piatto
-  (mostrata con un'**icona**, non il nome).
+- Un solo bottone "Cosa mangio oggi?" (sotto le ruote) fa girare
+  **tutte** le ruote contemporaneamente, estraendo una ricetta a caso
+  per ciascun piatto (mostrata con un'**icona illustrata**, non il
+  nome - niente emoji, un piccolo set di disegni SVG a colori pieni in
+  `src/components/RecipeIcon.tsx`).
 - Filtri opzionali per ogni ruota: categoria (singola selezione tra
   Tutti, Colazione, Main, Primo, Secondo, Contorno, Spuntino) e tag
   (multiselezione da menu a tendina).

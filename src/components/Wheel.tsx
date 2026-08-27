@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { iconaRicetta, type Ricetta } from "../lib/recipes";
+import { chiaveIconaRicetta, type Ricetta } from "../lib/recipes";
+import { RecipeIcon } from "./RecipeIcon";
 
 const COLORS = [
   "var(--color-ottanio)",
@@ -71,17 +72,12 @@ export function Wheel({
                 stroke={COLORS[i % COLORS.length]}
                 strokeWidth="1"
               />
-              <text
-                x={tx}
-                y={ty}
-                fontSize="26"
-                textAnchor="middle"
-                dominantBaseline="middle"
-                transform={`rotate(${mid} ${tx} ${ty})`}
-                style={{ filter: "drop-shadow(0 1px 1px rgba(47,72,88,0.3))" }}
+              <g
+                transform={`translate(${tx} ${ty}) rotate(${mid})`}
+                style={{ filter: "drop-shadow(0 1px 1.5px rgba(47,72,88,0.35))" }}
               >
-                {iconaRicetta(r)}
-              </text>
+                <RecipeIcon chiave={chiaveIconaRicetta(r)} />
+              </g>
             </g>
           );
         })}
