@@ -1,25 +1,26 @@
 import { useState } from "react";
 import { chiaveIconaRicetta, type Ricetta } from "../lib/recipes";
 import { RecipeIcon } from "./RecipeIcon";
-
-type Tipo = "mie" | "tutte";
+import type { LibroLocale } from "../lib/device";
 
 export function ElencoRicette({
   ricette,
   onElimina,
   onChiudi,
+  libri,
   libriModificabili,
 }: {
   ricette: Ricetta[];
   onElimina: (id: string) => Promise<void>;
   onChiudi: () => void;
+  libri: LibroLocale[];
   libriModificabili: string[];
 }) {
-  const [tipo, setTipo] = useState<Tipo>("mie");
+  const [tipo, setTipo] = useState<string>("tutte");
   const [eliminando, setEliminando] = useState<string | null>(null);
 
   const visibili =
-    tipo === "mie" ? ricette.filter((r) => !r.standard) : ricette;
+    tipo === "tutte" ? ricette : ricette.filter((r) => r.libro === tipo);
 
   async function handleElimina(id: string) {
     setEliminando(id);
@@ -44,14 +45,7 @@ export function ElencoRicette({
           </button>
         </div>
 
-        <div className="mb-3 flex gap-1.5">
-          <span
-            className="pixel-chip"
-            data-active={tipo === "mie"}
-            onClick={() => setTipo("mie")}
-          >
-            Solo mie
-          </span>
+        <div className="mb-3 flex flex-wrap gap-1.5">
           <span
             className="pixel-chip"
             data-active={tipo === "tutte"}
@@ -59,6 +53,16 @@ export function ElencoRicette({
           >
             Tutte
           </span>
+          {libri.map((l) => (
+            <span
+              key={l.codice}
+              className="pixel-chip"
+              data-active={tipo === l.codice}
+              onClick={() => setTipo(l.codice)}
+            >
+              {l.nome}
+            </span>
+          ))}
         </div>
 
         {visibili.length === 0 && (

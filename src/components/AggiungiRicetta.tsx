@@ -1,9 +1,12 @@
 import { useState } from "react";
 import { CATEGORIE, CATEGORIA_LABEL, TAG_BASE, type Categoria } from "../lib/recipes";
+import type { LibroLocale } from "../lib/device";
 
 export function AggiungiRicetta({
   onClose,
   onSalva,
+  libri,
+  libroAttivo,
 }: {
   onClose: () => void;
   onSalva: (input: {
@@ -12,7 +15,10 @@ export function AggiungiRicetta({
     procedimento?: string;
     pasto: Categoria[];
     tag: string[];
+    libro: string;
   }) => Promise<void>;
+  libri: LibroLocale[];
+  libroAttivo: string;
 }) {
   const [nome, setNome] = useState("");
   const [ingredienti, setIngredienti] = useState("");
@@ -21,6 +27,7 @@ export function AggiungiRicetta({
   const [tagBase, setTagBase] = useState<string[]>([]);
   const [tagCustom, setTagCustom] = useState<string[]>([]);
   const [nuovoTag, setNuovoTag] = useState("");
+  const [libroScelto, setLibroScelto] = useState(libroAttivo);
   const [salvataggio, setSalvataggio] = useState(false);
   const [errore, setErrore] = useState<string | null>(null);
 
@@ -60,6 +67,7 @@ export function AggiungiRicetta({
         procedimento: procedimento.trim() || undefined,
         pasto: pastiScelti,
         tag: [...tagBase, ...tagCustom],
+        libro: libroScelto,
       });
       onClose();
     } catch {
@@ -113,6 +121,24 @@ export function AggiungiRicetta({
               onChange={(e) => setProcedimento(e.target.value)}
             />
           </label>
+
+          {libri.length > 1 && (
+            <div className="flex flex-col gap-1">
+              <span className="text-sm opacity-80">Salva nel libro</span>
+              <div className="flex flex-wrap gap-1.5">
+                {libri.map((l) => (
+                  <span
+                    key={l.codice}
+                    className="pixel-chip"
+                    data-active={libroScelto === l.codice}
+                    onClick={() => setLibroScelto(l.codice)}
+                  >
+                    {l.nome}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="flex flex-col gap-1">
             <span className="text-sm opacity-80">Categoria (multiselezione)</span>

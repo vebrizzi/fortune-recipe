@@ -173,9 +173,13 @@ export default function App() {
     procedimento?: string;
     pasto: Categoria[];
     tag: string[];
+    libro: string;
   }) {
-    if (!libroAttivo) throw new Error("Nessun libro attivo su cui salvare la ricetta.");
-    await creaRicetta({ deviceId, libro: libroAttivo, ...input });
+    await creaRicetta({ deviceId, ...input });
+    if (input.libro !== libroAttivo) {
+      setLibroAttivo(input.libro);
+      setLibroAttivoState(input.libro);
+    }
     await ricarica();
   }
 
@@ -386,10 +390,12 @@ export default function App() {
         Aggiungi ricetta
       </button>
 
-      {mostraAggiungi && (
+      {mostraAggiungi && libroAttivo && (
         <AggiungiRicetta
           onClose={() => setMostraAggiungi(false)}
           onSalva={handleSalvaRicetta}
+          libri={libri.filter((l) => l.modificabile)}
+          libroAttivo={libroAttivo}
         />
       )}
 
@@ -398,6 +404,7 @@ export default function App() {
           ricette={ricette}
           onElimina={handleElimina}
           onChiudi={() => setMostraElenco(false)}
+          libri={libri}
           libriModificabili={libriModificabili}
         />
       )}
