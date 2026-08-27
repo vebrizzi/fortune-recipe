@@ -146,13 +146,15 @@ pubblicata parlera' con gli stessi dati che vedi in locale.
 
 ## Palette e stile
 
-Palette ispirata a un moodboard "recipe book": cyan acceso
-(`--color-ottanio` #55DDE0), blu baltico (`--color-wood` #33658A), blu
-antracite (`--color-crust` #2F4858, testo/scurо), bronzo miele
+Palette ispirata a un moodboard "recipe book": salvia
+(`--color-ottanio` #9BC4BC), blu baltico (`--color-wood` #33658A), blu
+antracite (`--color-crust` #2F4858, testo/scuro), bronzo miele
 (`--color-ochre` #F6AE2D) e arancio (`--color-tomato` #F26419),
 definiti in `src/index.css` come token Tailwind. Font: "Lobster"
 (script) per il titolo principale, "Baloo 2" (bold) per sottotitoli e
-bottoni, "Nunito" per i testi lunghi.
+bottoni, "Nunito" per i testi lunghi. Lo sfondo della pagina e' una
+sfumatura diagonale tra i due blu e il bronzo miele; i pannelli
+restano bianchi per contrasto.
 
 Stile "a riempimento", senza bordi: pannelli, bottoni, chip e input non
 hanno un contorno disegnato, la separazione visiva viene solo dal

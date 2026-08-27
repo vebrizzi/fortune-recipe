@@ -10,8 +10,8 @@
   --color-ochre-light: #fac463;
   --color-tomato: #f26419;
   --color-tomato-light: #f58a52;
-  --color-ottanio: #55dde0;
-  --color-ottanio-light: #8fe9ec;
+  --color-ottanio: #9bc4bc;
+  --color-ottanio-light: #c2ddd7;
   --color-cream: #f7fafb;
   --color-cream-dark: #e4eef1;
   --color-paper: #ffffff;
@@ -34,7 +34,12 @@
 
   body {
     margin: 0;
-    background: var(--color-cream);
+    background: linear-gradient(
+      135deg,
+      var(--color-crust) 0%,
+      var(--color-wood) 55%,
+      var(--color-ochre) 100%
+    );
     color: var(--color-crust);
     font-family: var(--font-body);
     font-size: 16px;

@@ -252,9 +252,14 @@ export default function App() {
   return (
     <div className="min-h-screen px-4 py-6">
       <header className="mx-auto mb-6 max-w-md text-center">
-        <h1 className="text-4xl leading-relaxed text-[var(--color-crust)]">
-          Cosa mangio oggi? 🎲
+        <h1 className="text-4xl leading-relaxed text-[var(--color-paper)]">
+          Cosa mangio oggi?
         </h1>
+        <p className="mt-2 text-sm text-[var(--color-paper)] opacity-90">
+          Non sai cosa cucinare? Scegli quanti piatti vuoi decidere, imposta
+          categoria e tag per ognuno, poi gira le ruote: un'icona a sorpresa
+          ti svela cosa preparare.
+        </p>
         <button
           className="pixel-btn pixel-btn-ottanio mt-3 px-4 py-2 text-sm"
           onClick={() => setMostraOpzioni(true)}
@@ -285,16 +290,10 @@ export default function App() {
           />
         </div>
 
-        {caricando && <p className="text-sm opacity-70">Carico le ricette...</p>}
-
-        {!caricando && (
-          <button
-            className="pixel-btn pixel-btn-ochre w-full max-w-md py-4 text-lg"
-            onClick={giraleTutte}
-            disabled={staGirando || nessunaRicettaDisponibile}
-          >
-            {staGirando ? "Sto girando..." : "Cosa mangio oggi?"}
-          </button>
+        {caricando && (
+          <p className="text-sm text-[var(--color-paper)] opacity-80">
+            Carico le ricette...
+          </p>
         )}
 
         {!caricando && (
@@ -349,8 +348,18 @@ export default function App() {
           </div>
         )}
 
+        {!caricando && (
+          <button
+            className="pixel-btn pixel-btn-ochre w-full max-w-md py-4 text-lg"
+            onClick={giraleTutte}
+            disabled={staGirando || nessunaRicettaDisponibile}
+          >
+            {staGirando ? "Sto girando..." : "Cosa mangio oggi?"}
+          </button>
+        )}
+
         <button
-          className="text-sm underline opacity-70"
+          className="text-sm text-[var(--color-paper)] underline opacity-90"
           onClick={() => setMostraElenco(true)}
         >
           Le mie ricette
