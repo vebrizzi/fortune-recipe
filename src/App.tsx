@@ -253,7 +253,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen px-4 py-6">
+    <div className="relative min-h-screen px-4 py-6">
       <BackgroundPattern />
 
       <header className="mx-auto mb-6 max-w-md text-center">

@@ -20,7 +20,7 @@ const ICONE_PATTERN: Array<{ chiave: IconaChiave; x: number; y: number; rot: num
 export function BackgroundPattern() {
   return (
     <svg
-      className="pointer-events-none fixed inset-0 h-full w-full"
+      className="pointer-events-none absolute inset-0 h-full w-full"
       style={{ zIndex: -1, opacity: 0.3 }}
       aria-hidden="true"
     >
