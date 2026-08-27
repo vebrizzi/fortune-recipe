@@ -2,10 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { iconaRicetta, type Ricetta } from "../lib/recipes";
 
 const COLORS = [
-  "var(--color-ochre-light)",
-  "var(--color-tomato-light)",
-  "var(--color-ottanio-light)",
-  "var(--color-wood-light)",
+  "var(--color-ottanio)",
+  "var(--color-ochre)",
+  "var(--color-tomato)",
+  "var(--color-wood)",
 ];
 
 function polar(cx: number, cy: number, r: number, deg: number) {
@@ -58,7 +58,7 @@ export function Wheel({
         className="wheel-spin h-full w-full"
         style={{ transform: `rotate(${angle}deg)` }}
       >
-        <circle cx="100" cy="100" r="98" fill="var(--color-paper)" stroke="var(--color-cream-dark)" strokeWidth="2" />
+        <circle cx="100" cy="100" r="98" fill="var(--color-paper)" />
         {items.map((r, i) => {
           const step = 360 / total;
           const mid = i * step + step / 2;
@@ -68,8 +68,8 @@ export function Wheel({
               <path
                 d={slicePath(i, total)}
                 fill={COLORS[i % COLORS.length]}
-                stroke="var(--color-paper)"
-                strokeWidth="2"
+                stroke={COLORS[i % COLORS.length]}
+                strokeWidth="1"
               />
               <text
                 x={tx}
@@ -78,7 +78,7 @@ export function Wheel({
                 textAnchor="middle"
                 dominantBaseline="middle"
                 transform={`rotate(${mid} ${tx} ${ty})`}
-                style={{ filter: "drop-shadow(0 1px 1px rgba(43,24,16,0.25))" }}
+                style={{ filter: "drop-shadow(0 1px 1px rgba(47,72,88,0.3))" }}
               >
                 {iconaRicetta(r)}
               </text>
@@ -97,7 +97,7 @@ export function Wheel({
             Nessuna ricetta
           </text>
         )}
-        <circle cx="100" cy="100" r="16" fill="var(--color-cream)" stroke="var(--color-cream-dark)" strokeWidth="2" />
+        <circle cx="100" cy="100" r="16" fill="var(--color-cream)" />
       </svg>
     </div>
   );

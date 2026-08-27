@@ -171,7 +171,7 @@ export function Impostazioni({
           su questo dispositivo.
         </p>
 
-        <hr className="my-4 border-[var(--color-cream-dark)]" />
+        <div className="my-4 h-1 w-full rounded-full bg-[var(--color-cream-dark)]" />
 
         <h3 className="pixel-font text-base">Libri di ricette</h3>
         <p className="mt-1 text-sm opacity-70">
@@ -184,7 +184,7 @@ export function Impostazioni({
           {libri.map((l) => (
             <li
               key={l.codice}
-              className="rounded-xl border border-[var(--color-cream-dark)] bg-[var(--color-cream)] px-3 py-2"
+              className="rounded-xl bg-[var(--color-cream-dark)] px-3 py-2"
             >
               {inRinomina === l.codice ? (
                 <div className="flex gap-1.5">
@@ -327,7 +327,7 @@ export function Impostazioni({
               Libro creato! Salva questo codice: ti servira' per aggiungerlo su
               altri dispositivi.
             </p>
-            <div className="flex items-center justify-between gap-2 rounded-xl border border-[var(--color-cream-dark)] bg-[var(--color-cream)] px-3 py-2">
+            <div className="flex items-center justify-between gap-2 rounded-xl bg-[var(--color-cream-dark)] px-3 py-2">
               <span className="font-mono text-xl tracking-widest">{codiceCreato}</span>
               <button
                 type="button"

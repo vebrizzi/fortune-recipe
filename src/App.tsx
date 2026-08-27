@@ -252,7 +252,7 @@ export default function App() {
   return (
     <div className="min-h-screen px-4 py-6">
       <header className="mx-auto mb-6 max-w-md text-center">
-        <h1 className="pixel-font text-3xl leading-relaxed text-[var(--color-crust)]">
+        <h1 className="text-4xl leading-relaxed text-[var(--color-crust)]">
           Cosa mangio oggi? 🎲
         </h1>
         <button

@@ -146,11 +146,16 @@ pubblicata parlera' con gli stessi dati che vedi in locale.
 
 ## Palette e stile
 
-Colori "da cucina" definiti in `src/index.css` come token Tailwind:
-marrone (`--color-wood`), ocra (`--color-ochre`), rosso pomodoro
-(`--color-tomato`), verde ottanio (`--color-ottanio`, un teal scuro -
-se intendevi un'altra tonalita' con "ottanio" e' il primo punto da
-sistemare). Stile semplice e pulito: font "Baloo 2" (bold) per i
-titoli, "Patrick Hand" (handwritten) per bottoni/etichette, "Nunito"
-per i testi, pannelli con angoli arrotondati e ombre morbide, ruota con
-icone piu' grandi e stilizzate.
+Palette ispirata a un moodboard "recipe book": cyan acceso
+(`--color-ottanio` #55DDE0), blu baltico (`--color-wood` #33658A), blu
+antracite (`--color-crust` #2F4858, testo/scurо), bronzo miele
+(`--color-ochre` #F6AE2D) e arancio (`--color-tomato` #F26419),
+definiti in `src/index.css` come token Tailwind. Font: "Lobster"
+(script) per il titolo principale, "Baloo 2" (bold) per sottotitoli e
+bottoni, "Nunito" per i testi lunghi.
+
+Stile "a riempimento", senza bordi: pannelli, bottoni, chip e input non
+hanno un contorno disegnato, la separazione visiva viene solo dal
+contrasto tra colori di sfondo e da ombre morbide (`box-shadow`). Anche
+la ruota non ha contorni sulle fette: i colori pieni bastano a
+distinguerle.

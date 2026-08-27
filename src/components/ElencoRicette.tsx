@@ -70,8 +70,7 @@ export function ElencoRicette({
           {visibili.map((r) => (
             <li
               key={r.id}
-              className="flex items-center justify-between border-3 border-[var(--color-crust)] bg-[var(--color-cream-dark)] px-3 py-2"
-              style={{ borderWidth: 3, borderStyle: "solid" }}
+              className="flex items-center justify-between rounded-2xl bg-[var(--color-cream-dark)] px-3 py-2"
             >
               <div className="flex items-center gap-2">
                 <span className="text-xl">{iconaRicetta(r)}</span>
