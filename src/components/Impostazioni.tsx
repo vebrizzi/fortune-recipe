@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { LibroLocale } from "../lib/device";
+import { ottieniLibri } from "../lib/recipes";
 
 type RisultatoUnione = { ok: true } | { ok: false; messaggio: string };
+type AnteprimaLibro = { stato: "idle" | "verificando" | "trovato" | "non-trovato"; nome?: string };
 
 export function Impostazioni({
   usaStandard,
@@ -23,19 +25,45 @@ export function Impostazioni({
   onImpostaAttivo: (codice: string) => void;
   onRimuovi: (codice: string) => void;
   onRinomina: (codice: string, nome: string) => Promise<void>;
-  onCrea: (nome: string, password?: string) => Promise<void>;
+  onCrea: (nome: string, password?: string) => Promise<string>;
   onUnisciti: (codice: string, password?: string) => Promise<RisultatoUnione>;
 }) {
-  const [formAperto, setFormAperto] = useState<"nessuno" | "crea" | "unisciti">("nessuno");
+  const [formAperto, setFormAperto] = useState<"nessuno" | "crea" | "unisciti" | "creato">(
+    "nessuno"
+  );
   const [inRinomina, setInRinomina] = useState<string | null>(null);
   const [nomeRinomina, setNomeRinomina] = useState("");
   const [errore, setErrore] = useState<string | null>(null);
   const [caricando, setCaricando] = useState(false);
+  const [copiato, setCopiato] = useState(false);
 
   const [nomeNuovo, setNomeNuovo] = useState("");
   const [passwordNuovo, setPasswordNuovo] = useState("");
+  const [codiceCreato, setCodiceCreato] = useState<string | null>(null);
   const [codiceUnione, setCodiceUnione] = useState("");
   const [passwordUnione, setPasswordUnione] = useState("");
+  const [anteprima, setAnteprima] = useState<AnteprimaLibro>({ stato: "idle" });
+
+  useEffect(() => {
+    if (formAperto !== "unisciti") return;
+    const valore = codiceUnione.trim();
+    if (!valore) {
+      setAnteprima({ stato: "idle" });
+      return;
+    }
+    setAnteprima({ stato: "verificando" });
+    const t = setTimeout(async () => {
+      try {
+        const info = await ottieniLibri([valore]);
+        setAnteprima(
+          info[0] ? { stato: "trovato", nome: info[0].nome } : { stato: "non-trovato" }
+        );
+      } catch {
+        setAnteprima({ stato: "idle" });
+      }
+    }, 450);
+    return () => clearTimeout(t);
+  }, [codiceUnione, formAperto]);
 
   async function copiaCodice(codice: string) {
     try {
@@ -43,6 +71,13 @@ export function Impostazioni({
     } catch {
       // se il clipboard non e' disponibile non facciamo nulla
     }
+  }
+
+  async function copiaCodiceCreato() {
+    if (!codiceCreato) return;
+    await copiaCodice(codiceCreato);
+    setCopiato(true);
+    setTimeout(() => setCopiato(false), 1500);
   }
 
   function iniziaRinomina(libro: LibroLocale) {
@@ -73,10 +108,11 @@ export function Impostazioni({
     setErrore(null);
     setCaricando(true);
     try {
-      await onCrea(nomeNuovo.trim(), passwordNuovo);
+      const codice = await onCrea(nomeNuovo.trim(), passwordNuovo);
+      setCodiceCreato(codice);
       setNomeNuovo("");
       setPasswordNuovo("");
-      setFormAperto("nessuno");
+      setFormAperto("creato");
     } catch {
       setErrore("Non sono riuscito a creare il libro. Riprova.");
     } finally {
@@ -285,6 +321,35 @@ export function Impostazioni({
           </div>
         )}
 
+        {formAperto === "creato" && codiceCreato && (
+          <div className="mt-3 flex flex-col gap-2">
+            <p className="text-sm opacity-80">
+              Libro creato! Salva questo codice: ti servira' per aggiungerlo su
+              altri dispositivi.
+            </p>
+            <div className="flex items-center justify-between gap-2 rounded-xl border border-[var(--color-cream-dark)] bg-[var(--color-cream)] px-3 py-2">
+              <span className="font-mono text-xl tracking-widest">{codiceCreato}</span>
+              <button
+                type="button"
+                className="pixel-btn pixel-btn-ottanio px-3 text-xs"
+                onClick={copiaCodiceCreato}
+              >
+                {copiato ? "Copiato!" : "Copia"}
+              </button>
+            </div>
+            <button
+              type="button"
+              className="pixel-btn pixel-btn-ochre w-full py-2 text-sm"
+              onClick={() => {
+                setCodiceCreato(null);
+                setFormAperto("nessuno");
+              }}
+            >
+              Fatto
+            </button>
+          </div>
+        )}
+
         {formAperto === "unisciti" && (
           <div className="mt-3 flex flex-col gap-2">
             <input
@@ -293,6 +358,17 @@ export function Impostazioni({
               value={codiceUnione}
               onChange={(e) => setCodiceUnione(e.target.value)}
             />
+            {anteprima.stato === "verificando" && (
+              <span className="text-sm opacity-60">Verifico...</span>
+            )}
+            {anteprima.stato === "trovato" && (
+              <span className="text-sm font-bold text-[var(--color-ottanio)]">
+                📖 {anteprima.nome}
+              </span>
+            )}
+            {anteprima.stato === "non-trovato" && (
+              <span className="text-sm opacity-60">Nessun libro con questo codice.</span>
+            )}
             <input
               type="password"
               className="pixel-input"

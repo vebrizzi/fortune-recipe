@@ -52,7 +52,7 @@ export default function App() {
 
   const [libri, setLibri] = useState<LibroLocale[]>(() => getLibri());
   const [libroAttivo, setLibroAttivoState] = useState<string | null>(() => getLibroAttivo());
-  const mostraOnboarding = libri.length === 0;
+  const [mostraOnboarding, setMostraOnboarding] = useState(() => getLibri().length === 0);
 
   const [ricette, setRicette] = useState<Ricetta[]>([]);
   const [usaStandard, setUsaStandard] = useState(true);
@@ -181,8 +181,8 @@ export default function App() {
     await ricarica();
   }
 
-  /** Crea un nuovo libro (usato sia dall'onboarding sia dalle Opzioni). */
-  async function handleCreaLibro(nome: string, password?: string) {
+  /** Crea un nuovo libro (usato sia dall'onboarding sia dalle Opzioni). Restituisce il codice generato. */
+  async function handleCreaLibro(nome: string, password?: string): Promise<string> {
     const codice = generaCodiceLibro();
     await creaLibro(codice, nome, password);
     const aggiornati = aggiungiOAggiornaLibro({ codice, nome, modificabile: true });
@@ -190,6 +190,7 @@ export default function App() {
     setLibroAttivo(codice);
     setLibroAttivoState(codice);
     await ricarica(aggiornati.map((l) => l.codice));
+    return codice;
   }
 
   /** Segue un libro esistente: in collaborazione se la password fornita e' corretta, altrimenti in sola lettura. */
@@ -398,7 +399,11 @@ export default function App() {
       )}
 
       {mostraOnboarding && (
-        <Onboarding onCrea={handleCreaLibro} onUnisciti={handleUnisciti} />
+        <Onboarding
+          onCrea={handleCreaLibro}
+          onUnisciti={handleUnisciti}
+          onFine={() => setMostraOnboarding(false)}
+        />
       )}
     </div>
   );
