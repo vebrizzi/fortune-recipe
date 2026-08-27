@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { chiaveIconaRicetta, type Ricetta } from "../lib/recipes";
-import { RecipeIcon } from "./RecipeIcon";
+import type { Ricetta } from "../lib/recipes";
 
 const COLORS = [
   "var(--color-ottanio)",
@@ -60,27 +59,15 @@ export function Wheel({
         style={{ transform: `rotate(${angle}deg)` }}
       >
         <circle cx="100" cy="100" r="98" fill="var(--color-paper)" />
-        {items.map((r, i) => {
-          const step = 360 / total;
-          const mid = i * step + step / 2;
-          const [tx, ty] = polar(100, 100, 66, mid);
-          return (
-            <g key={r.id}>
-              <path
-                d={slicePath(i, total)}
-                fill={COLORS[i % COLORS.length]}
-                stroke={COLORS[i % COLORS.length]}
-                strokeWidth="1"
-              />
-              <g
-                transform={`translate(${tx} ${ty}) rotate(${mid}) scale(0.65)`}
-                style={{ filter: "drop-shadow(0 1px 1.5px rgba(47,72,88,0.35))" }}
-              >
-                <RecipeIcon chiave={chiaveIconaRicetta(r)} />
-              </g>
-            </g>
-          );
-        })}
+        {items.map((r, i) => (
+          <path
+            key={r.id}
+            d={slicePath(i, total)}
+            fill={COLORS[i % COLORS.length]}
+            stroke={COLORS[i % COLORS.length]}
+            strokeWidth="1"
+          />
+        ))}
         {items.length === 0 && (
           <text
             x="100"
