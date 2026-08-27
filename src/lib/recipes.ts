@@ -24,7 +24,7 @@ export const CATEGORIA_LABEL: Record<Categoria, string> = {
   spuntino: "Spuntino",
 };
 
-export const TAG_BASE = ["light", "vegetariano", "vegano", "low cost"];
+export const TAG_BASE = ["light", "vegetariano", "vegano", "low cost", "low effort"];
 
 export type Ricetta = {
   id: string;
