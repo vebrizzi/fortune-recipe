@@ -43,7 +43,7 @@ export function Onboarding({
     setErrore(null);
     setCaricando(true);
     try {
-      const risultato = await onUnisciti(codice.trim().toUpperCase(), passwordUnione);
+      const risultato = await onUnisciti(codice.trim(), passwordUnione);
       if (!risultato.ok) setErrore(risultato.messaggio);
     } catch {
       setErrore("Non sono riuscito a controllare il codice. Riprova.");

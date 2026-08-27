@@ -199,9 +199,12 @@ export default function App() {
     if (!trovato) {
       return { ok: false, messaggio: "Codice non trovato." };
     }
+    // La ricerca e' case-insensitive: da qui in poi si usa sempre il codice
+    // cosi' come e' salvato sul server (trovato.codice), non quello digitato,
+    // perche' ricette_utente.libro va confrontato con match esatto.
     let modificabile = !trovato.protetto;
     if (trovato.protetto && password && password.trim()) {
-      const corretta = await verificaPasswordLibro(codice, password);
+      const corretta = await verificaPasswordLibro(trovato.codice, password);
       if (!corretta) {
         return {
           ok: false,
@@ -210,9 +213,13 @@ export default function App() {
       }
       modificabile = true;
     }
-    const aggiornati = aggiungiOAggiornaLibro({ codice, nome: trovato.nome, modificabile });
+    const aggiornati = aggiungiOAggiornaLibro({
+      codice: trovato.codice,
+      nome: trovato.nome,
+      modificabile,
+    });
     setLibri(aggiornati);
-    if (modificabile && !getLibroAttivo()) setLibroAttivo(codice);
+    if (modificabile && !getLibroAttivo()) setLibroAttivo(trovato.codice);
     setLibroAttivoState(getLibroAttivo());
     await ricarica(aggiornati.map((l) => l.codice));
     return { ok: true };

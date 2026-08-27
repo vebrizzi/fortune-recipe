@@ -92,7 +92,7 @@ export function Impostazioni({
     setErrore(null);
     setCaricando(true);
     try {
-      const risultato = await onUnisciti(codiceUnione.trim().toUpperCase(), passwordUnione);
+      const risultato = await onUnisciti(codiceUnione.trim(), passwordUnione);
       if (risultato.ok) {
         setCodiceUnione("");
         setPasswordUnione("");

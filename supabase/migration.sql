@@ -168,11 +168,16 @@ set search_path = public, extensions
 as $$
   select coalesce(
     (select password_hash is null or password_hash = crypt(p_password, password_hash)
-     from public.libri where codice = p_codice),
+     from public.libri where lower(codice) = lower(p_codice)),
     false
   );
 $$;
 
+-- Ricerca case-insensitive: i codici generati da questa versione sono
+-- sempre maiuscoli, ma i libri "ereditati" da versioni precedenti hanno
+-- codici minuscoli (erano UUID di dispositivo). Restituisce il codice
+-- cosi' come e' salvato (non quello digitato), da riusare per le
+-- query successive su ricette_utente.libro, che e' case-sensitive.
 create or replace function public.libri_info(p_codici text[])
 returns table(codice text, nome text, protetto boolean)
 language sql
@@ -181,7 +186,7 @@ set search_path = public
 as $$
   select codice, nome, (password_hash is not null) as protetto
   from public.libri
-  where codice = any(p_codici);
+  where lower(codice) = any(select lower(c) from unnest(p_codici) as c);
 $$;
 
 grant execute on function public.crea_libro(text, text, text) to anon, authenticated;
