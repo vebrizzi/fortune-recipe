@@ -373,7 +373,8 @@ export default function App() {
         style={libroAttivo ? undefined : { opacity: 0.5, cursor: "not-allowed" }}
         title={libroAttivo ? undefined : "Nessun libro modificabile: creane o aggiungine uno dalle Opzioni"}
       >
-        +
+        <span className="text-2xl leading-none">+</span>
+        Aggiungi ricetta
       </button>
 
       {mostraAggiungi && (

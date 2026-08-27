@@ -151,21 +151,26 @@
     position: fixed;
     right: 20px;
     bottom: 20px;
-    width: 56px;
-    height: 56px;
-    background: var(--color-ochre);
+    min-height: 64px;
+    padding: 14px 26px;
+    background: var(--color-tomato);
     border: none;
-    border-radius: 50%;
-    box-shadow: 0 4px 14px rgba(47, 72, 88, 0.25);
+    border-radius: 999px;
+    box-shadow: 0 6px 20px rgba(47, 72, 88, 0.35);
     font-family: var(--font-title);
     font-weight: 700;
-    font-size: 26px;
-    color: var(--color-crust);
+    font-size: 18px;
+    color: var(--color-paper);
     display: flex;
     align-items: center;
-    justify-content: center;
+    gap: 10px;
     z-index: 30;
-    transition: transform 0.12s ease;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+  }
+
+  .pixel-fab:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(47, 72, 88, 0.4);
   }
 
   .pixel-fab:active {
