@@ -5,6 +5,7 @@ import { AggiungiRicetta } from "./components/AggiungiRicetta";
 import { ElencoRicette } from "./components/ElencoRicette";
 import { Impostazioni } from "./components/Impostazioni";
 import { Onboarding } from "./components/Onboarding";
+import { RecipeIcon } from "./components/RecipeIcon";
 import {
   aggiungiOAggiornaLibro,
   generaCodiceLibro,
@@ -16,6 +17,7 @@ import {
   type LibroLocale,
 } from "./lib/device";
 import {
+  chiaveIconaRicetta,
   creaLibro,
   creaRicetta,
   eliminaRicetta,
@@ -327,7 +329,11 @@ export default function App() {
 
                 {slot.risultato && !slot.spinning && (
                   <div className="pixel-panel w-full max-w-[19rem] p-4 text-center">
-                    <p className="text-sm opacity-70">Oggi si mangia:</p>
+                    <svg viewBox="-16 -16 32 32" className="mx-auto h-14 w-14">
+                      <circle cx="0" cy="0" r="16" fill="var(--color-cream-dark)" />
+                      <RecipeIcon chiave={chiaveIconaRicetta(slot.risultato)} />
+                    </svg>
+                    <p className="mt-1 text-sm opacity-70">Oggi si mangia:</p>
                     <p className="pixel-font mt-1 text-xl">{slot.risultato.nome}</p>
                     {slot.risultato.ingredienti && (
                       <p className="mt-2 text-left text-base">

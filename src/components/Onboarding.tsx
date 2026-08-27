@@ -99,7 +99,7 @@ export function Onboarding({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--color-crust)]/70 px-4">
       <div className="pixel-panel w-full max-w-md p-5">
-        <h2 className="pixel-font text-xl">Benvenuto! 🎲</h2>
+        <h2 className="pixel-font text-xl">Benvenuto!</h2>
 
         {modo === "scelta" && (
           <>

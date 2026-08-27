@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <circle cx="32" cy="32" r="30" fill="#2f4858" />
+  <circle cx="32" cy="33" r="24" fill="#ffffff" />
+  <circle cx="32" cy="33" r="24" fill="none" stroke="#e4eef1" stroke-width="2" />
+
+  <!-- pasta -->
+  <g>
+    <ellipse cx="31" cy="23" rx="10.5" ry="7" fill="#fac463" />
+    <path
+      d="M23,23 Q28,16 33,22 T42,20"
+      stroke="#f6ae2d"
+      stroke-width="2.2"
+      fill="none"
+      stroke-linecap="round"
+    />
+    <path
+      d="M24,27 Q29,21 35,26"
+      stroke="#f6ae2d"
+      stroke-width="2.2"
+      fill="none"
+      stroke-linecap="round"
+    />
+    <circle cx="35" cy="19" r="1.8" fill="#f26419" />
+  </g>
+
+  <!-- carne -->
+  <g transform="rotate(-18 21 43)">
+    <ellipse cx="21" cy="43" rx="9.5" ry="6.5" fill="#33658a" />
+    <path d="M15,41 L27,45" stroke="#2f4858" stroke-width="1.1" opacity="0.55" />
+    <path d="M15,45 L27,41" stroke="#2f4858" stroke-width="1.1" opacity="0.55" />
+  </g>
+
+  <!-- verdure -->
+  <g>
+    <circle cx="43" cy="41" r="5.2" fill="#9bc4bc" />
+    <circle cx="48.5" cy="45" r="4.2" fill="#9bc4bc" />
+    <circle cx="42" cy="47.5" r="3.6" fill="#9bc4bc" />
+    <circle cx="45" cy="40" r="1.2" fill="#33658a" />
+    <circle cx="41" cy="43" r="1" fill="#33658a" />
+  </g>
+</svg>

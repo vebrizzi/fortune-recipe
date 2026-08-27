@@ -73,7 +73,7 @@ export function Wheel({
                 strokeWidth="1"
               />
               <g
-                transform={`translate(${tx} ${ty}) rotate(${mid})`}
+                transform={`translate(${tx} ${ty}) rotate(${mid}) scale(0.65)`}
                 style={{ filter: "drop-shadow(0 1px 1.5px rgba(47,72,88,0.35))" }}
               >
                 <RecipeIcon chiave={chiaveIconaRicetta(r)} />
