@@ -177,7 +177,11 @@ export function Impostazioni({
         <p className="mt-1 text-sm opacity-70">
           Le tue ricette vivono in uno o piu' "libri". Segui il codice di un
           libro per vedere le sue ricette; aggiungi anche la password (se ne
-          ha una) per poterci scrivere in collaborazione.
+          ha una) per poterci scrivere in collaborazione. Le ruote pescano
+          sempre da <strong>tutti</strong> i libri che segui insieme: tocca un
+          libro per scegliere quello <strong>predefinito</strong>, cioe' dove
+          finiscono le nuove ricette che aggiungi (puoi comunque scegliere un
+          libro diverso ogni volta, dal form "Aggiungi ricetta").
         </p>
 
         <ul className="mt-3 flex flex-col gap-1.5">
@@ -213,15 +217,23 @@ export function Impostazioni({
                 <div className="flex items-center justify-between gap-2">
                   <button
                     type="button"
-                    className="flex-1 truncate text-left"
+                    className="min-w-0 flex-1 text-left"
                     onClick={() => l.modificabile && onImpostaAttivo(l.codice)}
-                    title={l.modificabile ? "Imposta come libro attivo" : undefined}
+                    title={
+                      l.modificabile
+                        ? "Imposta come libro predefinito per il salvataggio"
+                        : undefined
+                    }
                   >
-                    <span className="text-base">
-                      {l.codice === libroAttivo ? "● " : "○ "}
-                      {l.nome}
+                    <span className="flex flex-wrap items-center gap-1">
+                      <span className="truncate text-base">{l.nome}</span>
+                      {l.codice === libroAttivo && (
+                        <span className="shrink-0 rounded-full bg-[var(--color-ottanio)] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[var(--color-crust)]">
+                          Predefinito
+                        </span>
+                      )}
                     </span>
-                    <span className="ml-1 font-mono text-xs opacity-60">
+                    <span className="block font-mono text-xs opacity-60">
                       {l.codice}
                       {!l.modificabile && " · sola lettura"}
                     </span>
