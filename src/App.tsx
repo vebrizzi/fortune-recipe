@@ -6,6 +6,7 @@ import { ElencoRicette } from "./components/ElencoRicette";
 import { Impostazioni } from "./components/Impostazioni";
 import { Onboarding } from "./components/Onboarding";
 import { RecipeIcon } from "./components/RecipeIcon";
+import { BackgroundPattern } from "./components/BackgroundPattern";
 import {
   aggiungiOAggiornaLibro,
   generaCodiceLibro,
@@ -253,6 +254,8 @@ export default function App() {
 
   return (
     <div className="min-h-screen px-4 py-6">
+      <BackgroundPattern />
+
       <header className="mx-auto mb-6 max-w-md text-center">
         <h1 className="text-4xl leading-relaxed text-[var(--color-paper)]">
           Cosa mangio oggi?
