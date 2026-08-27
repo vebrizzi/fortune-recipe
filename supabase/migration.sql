@@ -136,7 +136,7 @@ create or replace function public.crea_libro(p_codice text, p_nome text, p_passw
 returns void
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, extensions
 as $$
 begin
   insert into public.libri (codice, nome, password_hash)
@@ -164,7 +164,7 @@ create or replace function public.verifica_password_libro(p_codice text, p_passw
 returns boolean
 language sql
 security definer
-set search_path = public
+set search_path = public, extensions
 as $$
   select coalesce(
     (select password_hash is null or password_hash = crypt(p_password, password_hash)
